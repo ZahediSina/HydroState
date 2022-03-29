@@ -1090,14 +1090,14 @@ setMethod(f="viterbi",signature=c("hydroState","data.frame","logical","numeric",
     grid(NA,NULL)
     legend('topright', legend=c('Cum. residual ',.Object@state.labels),
            lty=c(1,NA,NA),pch=c(NA,21,21), col=c('grey',state.colours),
-           pt.bg=c(NA,state.colours), xjust=0, cex=1.5, bg='white')
+           pt.bg=c(NA,state.colours), xjust=0, cex=0.5, bg='white')
 
     # Colour the points by the Viterbi state.
     for (i in 1:nQhat) {
       points(obsDates.asISO[i], P.cumResid[i],col=state.colours[viterbiPath[i]], bg=state.colours[viterbiPath[i]], pch=21)
     }
-    mtext("Cum. rainfall resid.",side=2,line=3)
-    mtext(paste("[mm]"),side=2,line=2, cex=0.85)
+    mtext("Cum. rainfall resid.",side=2,line=3, cex=0.5)
+    mtext(paste("[mm]"),side=2,line=2, cex=0.4)
     plot.range=par("usr")
     text(plot.range[1]+diff(plot.range[1:2])*0.025, plot.range[3]+diff(par("usr")[3:4])*0.95, labels="D", font=1, cex=2,pos=1)
 
@@ -1115,8 +1115,8 @@ setMethod(f="viterbi",signature=c("hydroState","data.frame","logical","numeric",
           lines(obsDates.asISO, state.probs[i,], col=state.colours[i])
         }
       }
-      mtext("State Prob.",side=2,line=3)
-      mtext(paste("[-]"),side=2,line=2, cex=0.85)
+      mtext("State Prob.",side=2,line=3, cex=0.5)
+      mtext(paste("[-]"),side=2,line=2, cex=0.4)
       mtext('Year',side=1,line=3)
       axis(1,at= xaxis.ticks,labels=seq(1900,2020,by=10))
       abline(v=xaxis.ticks, col = "lightgray", lty = "dotted",lwd = par("lwd"))
