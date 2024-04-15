@@ -38,6 +38,7 @@ Collate:
     'QhatModel.subAnnual.homo.gamma.linear.AR2.R'
     'QhatModel.subAnnual.homo.gamma.linear.AR3.R'
     'markov.annualHomogeneous.R'
+    'markov.annualNonHomogeneous.R'
     'hydroState.R'
     'hydroState.allModels.R'
     'hydroState.subAnnual.allModels.R'

@@ -84,8 +84,8 @@ setMethod(f="setBounds",
                 .Object@upper.bound[[parameter.names[i]]] <- 10^3;
               } else if (parameter.names[i]=='mean.a0' || parameter.names[i]=='mean.summer.a0' || parameter.names[i]=='mean.autumn.a0' ||
                          parameter.names[i]=='mean.winter.a0' || parameter.names[i]=='mean.spring.a0') {
-                 # .Object@lower.bound[[parameter.names[i]]] <- -1;
-                 # .Object@upper.bound[[parameter.names[i]]] <- 1;
+                # .Object@lower.bound[[parameter.names[i]]] <- -1;
+                # .Object@upper.bound[[parameter.names[i]]] <- 1;
                 .Object@lower.bound[[parameter.names[i]]] <- -0.5;
                 .Object@upper.bound[[parameter.names[i]]] <- 0.5;
               } else if (parameter.names[i]=='mean.a0.amp') {
@@ -144,6 +144,27 @@ setMethod(f="setBounds",
               } else if (parameter.names[i]=='transition.prob') {
                 .Object@lower.bound[[parameter.names[i]]] <- 0;
                 .Object@upper.bound[[parameter.names[i]]] <- 1;
+              } else if (parameter.names[i]=='transition.prob.amp') {
+                .Object@lower.bound[[parameter.names[i]]] <- 0;
+                .Object@upper.bound[[parameter.names[i]]] <- 1;
+              } else if (parameter.names[i]=='transition.prob.lower') {
+                .Object@lower.bound[[parameter.names[i]]] <- 0;
+                .Object@upper.bound[[parameter.names[i]]] <- 1;
+              } else if (parameter.names[i]=='transition.prob.slope') {
+                .Object@lower.bound[[parameter.names[i]]] <- 10^-11;
+                .Object@upper.bound[[parameter.names[i]]] <- 1;
+              } else if (parameter.names[i]=='transition.prob.center') {
+                .Object@lower.bound[[parameter.names[i]]] <- 0;
+                .Object@upper.bound[[parameter.names[i]]] <- 1;
+              } else if (parameter.names[i]=='transition.prob.pearson.B') {
+                .Object@lower.bound[[parameter.names[i]]] <- 10^-3;
+                .Object@upper.bound[[parameter.names[i]]] <- 10;
+              } else if (parameter.names[i]=='transition.prob.pearson.N') {
+                .Object@lower.bound[[parameter.names[i]]] <- 1;
+                .Object@upper.bound[[parameter.names[i]]] <- 10;
+              } else if (parameter.names[i]=='transition.prob.pearson.A') {
+                .Object@lower.bound[[parameter.names[i]]] <- 0;
+                .Object@upper.bound[[parameter.names[i]]] <- 10;
               } else if (parameter.names[i]=='initial.state.prob') {
                 .Object@lower.bound[[parameter.names[i]]] <- 0;
                 .Object@upper.bound[[parameter.names[i]]] <- 1;
@@ -174,7 +195,7 @@ setMethod(f="setTransforms",
               if (parameter.names[i]=='lambda') {
                 .Object@use.log.transform[[parameter.names[i]]] <- T
               } else if (parameter.names[i]=='lambda.burbidge') {
-                  .Object@use.log.transform[[parameter.names[i]]] <- T
+                .Object@use.log.transform[[parameter.names[i]]] <- T
               } else if (parameter.names[i]=='mean.a0' || parameter.names[i]=='mean.summer.a0' || parameter.names[i]=='mean.autumn.a0' ||
                          parameter.names[i]=='mean.winter.a0' || parameter.names[i]=='mean.spring.a0' ||
                          parameter.names[i]=='mean.a0.amp' || parameter.names[i]=='mean.a0.disp' || parameter.names[i]=='mean.a0.phase') {
@@ -202,6 +223,20 @@ setMethod(f="setTransforms",
               } else if (parameter.names[i]=='shape.a0') {
                 .Object@use.log.transform[[parameter.names[i]]] <- F;
               } else if (parameter.names[i]=='transition.prob') {
+                .Object@use.log.transform[[parameter.names[i]]] <- F;
+              } else if (parameter.names[i]=='transition.prob.amp') {
+                .Object@use.log.transform[[parameter.names[i]]] <- F;
+              } else if (parameter.names[i]=='transition.prob.lower') {
+                .Object@use.log.transform[[parameter.names[i]]] <- F;
+              } else if (parameter.names[i]=='transition.prob.slope') {
+                .Object@use.log.transform[[parameter.names[i]]] <- F;
+              } else if (parameter.names[i]=='transition.prob.center') {
+                .Object@use.log.transform[[parameter.names[i]]] <- F;
+              } else if (parameter.names[i]=='transition.prob.pearson.B') {
+                .Object@use.log.transform[[parameter.names[i]]] <- F;
+              } else if (parameter.names[i]=='transition.prob.pearson.N') {
+                .Object@use.log.transform[[parameter.names[i]]] <- F;
+              } else if (parameter.names[i]=='transition.prob.pearson.A') {
                 .Object@use.log.transform[[parameter.names[i]]] <- F;
               } else if (parameter.names[i]=='initial.state.prob') {
                 .Object@use.log.transform[[parameter.names[i]]] <- F;
