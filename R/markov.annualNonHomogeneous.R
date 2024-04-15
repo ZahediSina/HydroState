@@ -226,7 +226,7 @@ setMethod(f="getTransitionProbabilities",
 
 
 # Get the log likelihood for the input data.
-setMethod(f="getLogLikelihood", signature=c("markov.annualHomogeneous","data.frame","matrix"),
+setMethod(f="getLogLikelihood", signature=c("markov.annualNonHomogeneous","data.frame","matrix"),
           definition=function(.Object, data, emission.probs)
           {
             # Check all the emmision probs. are finite.
@@ -295,7 +295,7 @@ setMethod(f="getLogLikelihood", signature=c("markov.annualHomogeneous","data.fra
 # Get the log forward probabilities for the input data.
 #' @exportMethod getLogForwardProbabilities
 setGeneric(name="getLogForwardProbabilities",def=function(.Object, data, emission.probs) {standardGeneric("getLogForwardProbabilities")})
-setMethod(f="getLogForwardProbabilities", signature=c("markov.annualHomogeneous","data.frame","matrix"),
+setMethod(f="getLogForwardProbabilities", signature=c("markov.annualNonHomogeneous","data.frame","matrix"),
           definition=function(.Object, data, emission.probs)
           {
 
@@ -338,7 +338,7 @@ setMethod(f="getLogForwardProbabilities", signature=c("markov.annualHomogeneous"
 
 # Get the log backward probabilities for the input data.
 setGeneric(name="getLogBackwardProbabilities",def=function(.Object, data, emission.probs) {standardGeneric("getLogBackwardProbabilities")})
-setMethod(f="getLogBackwardProbabilities", signature=c("markov.annualHomogeneous","data.frame","matrix"),
+setMethod(f="getLogBackwardProbabilities", signature=c("markov.annualNonHomogeneous","data.frame","matrix"),
           definition=function(.Object, data, emission.probs)
           {
 
@@ -380,7 +380,7 @@ setMethod(f="getLogBackwardProbabilities", signature=c("markov.annualHomogeneous
 
 
 # Get the conditional probability of a givn Qhat observation at time t given all other observations.
-setMethod(f="getConditionalProbabilities", signature="markov.annualHomogeneous",
+setMethod(f="getConditionalProbabilities", signature="markov.annualNonHomogeneous",
           definition=function(.Object, data, emission.probs, cumprob.atQhatIncrements)
           {
             # Get number of states
