@@ -210,7 +210,7 @@ setMethod(f="getTransitionProbabilities",
                   parameters$transition.prob.amp[] <- Inf
                   parameters$transition.prob.lower[]<- Inf
 
-                  # Once Inf is set, no need to check further elements
+                  # Once Inf is set, no need to check further element
                   break
                 }
 
