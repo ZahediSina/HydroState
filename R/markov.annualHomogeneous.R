@@ -496,7 +496,7 @@ setMethod(f="getConditionalProbabilities", signature="markov.annualHomogeneous",
 )
 
 # Get the number of states.
-setGeneric(name="getNumStates",def=function(.Object) {standardGeneric("getNumStates")})
+#setGeneric(name="getNumStates",def=function(.Object) {standardGeneric("getNumStates")})
 setMethod(f="getNumStates",
           signature="markov.annualHomogeneous",
           definition=function(.Object)

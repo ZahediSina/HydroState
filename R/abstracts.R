@@ -80,7 +80,8 @@ setMethod(f="generate.sample.states",signature="markov",  definition=function(.O
 setGeneric(name="getConditionalStateProbabilities",def=function(.Object, data, emission.probs) {standardGeneric("getConditionalStateProbabilities")})
 setMethod(f="getConditionalStateProbabilities",signature="markov",  definition=function(.Object, data, emission.probs){})
 
-#setGeneric(name="getConditionalProbabilities",def=function(.Object, data, emission.probs, zscore.increment.probs) {standardGeneric("getConditionalProbabilities")})
-#setMethod(f="getConditionalProbabilities",signature="markov",  definition=function(.Object, data, emission.probs, zscore.increment.probs){})
 setGeneric(name="getConditionalProbabilities",def=function(.Object, data, emission.probs, cumprob.atQhatIncrements) {standardGeneric("getConditionalProbabilities")})
 setMethod(f="getConditionalProbabilities",signature="markov",  definition=function(.Object, data, emission.probs, cumprob.atQhatIncrements){})
+
+setGeneric(name="getNumStates",def=function(.Object) {standardGeneric("getNumStates")})
+setMethod(f="getNumStates",signature="markov",  definition=function(.Object){})

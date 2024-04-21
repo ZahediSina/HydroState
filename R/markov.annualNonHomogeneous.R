@@ -103,9 +103,11 @@ setMethod(
     meand <- mean(d)
     d <- c(rep(meand, 50), d)
 
-    b <- .Object@parameters@values$'transition.prob.pearson.B'
-    k <- .Object@parameters@values$'transition.prob.pearson.N'
-    a <- .Object@parameters@values$'transition.prob.pearson.A'
+    parameters = getParameters(.Object@parameters)
+
+    b <- parameters$transition.prob.pearson.B
+    k <- parameters$transition.prob.pearson.N
+    a <- parameters$transition.prob.pearson.A
 
 
 
@@ -139,6 +141,7 @@ setMethod(
     }
 
     f <- f[51:N]
+    #message(paste('f:',f[51]))
     return(f)
   }
 )
@@ -159,17 +162,16 @@ setMethod(
 
     forcingValues = getForcing(.Object)
     forcingRange<-(max(forcingValues, na.rm =TRUE) - min(forcingValues, na.rm = TRUE))
-
+    parameters = getParameters(.Object@parameters)
     # Extract specific parameters
-    cmdx <- .Object@parameters@values$'transition.prob.center'*forcingRange
-    slp <- .Object@parameters@values$'transition.prob.slope' / 10 * (1 - 10^-11) + 10^-11
+    cmdx <- parameters$transition.prob.center*forcingRange
+    slp <- parameters$transition.prob.slope / 10 * (1 - 10^-11) + 10^-11
 
     N <- length(forcingValues)
     L <- numeric(N)
 
     # Apply the logistic equation
     L <- 1 / (1 + exp(-slp * (forcingValues - cmdx)))
-
     # Return logistic curve values
     return(L)
   }
@@ -177,7 +179,7 @@ setMethod(
 
 
 
-
+#setGeneric( name = "getTransitionProbabilities", def = function(.Object, data) {standardGeneric("getTransitionProbabilities")})
 # Get transition matrix with no input data.
 setMethod(f="getTransitionProbabilities",
           signature="markov.annualNonHomogeneous",
@@ -185,40 +187,86 @@ setMethod(f="getTransitionProbabilities",
           {
             # Get number of states
             nStates = getNumStates(.Object)
-
             # Handle 1 state model.
             if (nStates==1) {
               return(c(1))
             }
 
-            # Check amp and lower sum to <=1
-            if (any(.Object@parameters@values$transition.prob.amp + .Object@parameters@values$transition.prob.lower)>1) {
-              return(Inf)
-            }
-
             # Get object parameter vector
             parameters = getParameters(.Object@parameters)
+
+
+            # # Check amp and lower sum to <=1
+            # if (any(parameters$transition.prob.amp + parameters$transition.prob.lower>1)) {
+            #
+            #   return(Inf)
+            # }
+
+
+              for (i in 1:2){
+
+                if (any(parameters$transition.prob.amp[i] + parameters$transition.prob.lower[i]>1)){
+
+                  parameters$transition.prob.amp[] <- Inf
+                  parameters$transition.prob.lower[]<- Inf
+
+                  # Once Inf is set, no need to check further elements
+                  break
+                }
+
+
+              }
+
+
 
             # Get logistic function from weighted forcing
             forcingValues = getForcing(.Object)
             logisticValues = applyLogistic(.Object)
-
+           # message(paste('logisticValues :',length(logisticValues)))
             # Get number of time steps from input data
             nT = length(logisticValues)
-
+            #message(paste('nT',nT))
             # Initials output
             Tprob = array(0.0,c(nStates,nStates, nT))
 
 
             # Cal. vector of transition prob for first time step from amp and lower for state 1.
-            Tprob[1,1,] = logisticValues * .Object@parameters@values$transition.prob.amp[1] + .Object@parameters@values$transition.prob.lower[1]
+            Tprob[1,1,] = logisticValues * parameters$transition.prob.amp[1] + parameters$transition.prob.lower[1]
 
             # Cal. vector of transition prob for first time step from amp and lower for state 2.
-            Tprob[2,2,] = logisticValues * .Object@parameters@values$transition.prob.amp[2] + .Object@parameters@values$transition.prob.lower[2]
+            Tprob[2,2,] = logisticValues * parameters$transition.prob.amp[2] + parameters$transition.prob.lower[2]
 
             # Calc off-diagonal prbs (ie 1- that above)
             Tprob[1,2,] = 1 - Tprob[1,1,]
             Tprob[2,1,] = 1 - Tprob[2,2,]
+
+            for (i in 1:2){
+
+              for (j in 1:2){
+
+                if (any(Tprob[i, j, ] > 1 | Tprob[i, j, ] < 0)){
+
+                  Tprob[,,] <- Inf
+                  # Once Inf is set, no need to check further elements
+                  break
+                }
+
+
+              }
+
+
+            }
+
+            # Check if Tprob is actually 3D
+            if (length(dim(Tprob)) < 3) {
+              stop("Tprob does not have the expected three dimensions")
+            }
+
+            #  message(paste('Tprob :',length(dim(Tprob))))
+             # message(paste('transProbs[1,1,3] :',Tprob[1,1,3]))
+            #   message(paste('anp[1] :',.Object@parameters@values$transition.prob.amp[1]))
+              # message(paste('lower[1] :',.Object@parameters@values$transition.prob.lower[1]))
+            #  message(paste('logisticValues[10] :',logisticValues[10]))
 
             return(Tprob)
           }
@@ -250,14 +298,16 @@ setMethod(f="getLogLikelihood", signature=c("markov.annualNonHomogeneous","data.
 
             # Get the initial state probabilites
             alpha = getInitialStateProbabilities(.Object)
-
             # Check the initial state probs are sum to 1 and are all b/w 0 and 1.
             if (abs(sum(alpha)-1)>sqrt(.Machine$double.eps) || any(alpha<0) || any(alpha>1))
               return(Inf)
 
             # Get the transition matrix.
             Tprob = getTransitionProbabilities(.Object)
-
+           # message(paste('lengthTprob :',length(dim(Tprob))))
+            if (length(dim(Tprob)) < 3) {
+              stop("Tprob does not have the expected three dimensions")
+            }
             # Only accept the parameters if the forward probabilities from the first to next time step show
             # that the state has not switched state after the first time step.
             P.forward <- getLogForwardProbabilities(.Object, data[1:2,], as.matrix(emission.probs[1:2,], ncol=nStates))
@@ -310,7 +360,9 @@ setMethod(f="getLogForwardProbabilities", signature=c("markov.annualNonHomogeneo
 
             # Get the transition matrix.
             Tprob = getTransitionProbabilities(.Object)
-
+            if (length(dim(Tprob)) < 3) {
+              stop("Tprob does not have the expected three dimensions")
+            }
             # Set Emmision probs 1.0 if no obs data.
             emission.probs[!filt,] = 1
 
@@ -353,7 +405,9 @@ setMethod(f="getLogBackwardProbabilities", signature=c("markov.annualNonHomogene
 
             # Get the transition matrix.
             Tprob = getTransitionProbabilities(.Object)
-
+            if (length(dim(Tprob)) < 3) {
+              stop("Tprob does not have the expected three dimensions")
+            }
             # Set Emmision probs 1.0 if no obs data.
             emission.probs[!filt,] = 1
 
@@ -391,7 +445,9 @@ setMethod(f="getConditionalProbabilities", signature="markov.annualNonHomogeneou
 
             # Get the transition matrix.
             Tprob = getTransitionProbabilities(.Object)
-
+            if (length(dim(Tprob)) < 3) {
+              stop("Tprob does not have the expected three dimensions")
+            }
             # Adapted from Zucchini, McDonald and Langrock, 2016, Hidden Markov Models for Time Series, 2nd Edision, Appendix A.
             #---------------------------------------------------------------------
 

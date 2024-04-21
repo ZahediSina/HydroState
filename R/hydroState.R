@@ -2,6 +2,7 @@
 ##' @include QhatModel.homo.normal.linear.R
 ##' ##' @include QhatModel.homo.normal.linear.AR1..R
 ##' @include markov.annualHomogeneous.R
+##' @include markov.annualNonHomogeneous.R
 ##' @export
 hydroState <- setClass(
   # Set the name for the class
@@ -24,7 +25,7 @@ hydroState <- setClass(
     input.data = data.frame(year=c(0),month=c(0),precipitation=c(0),flow=c(0)),
     Qhat.object  = new('Qhat.boxcox',input.data = data.frame(year=c(0),month=c(0),precipitation=c(0),flow=c(0))),
     QhatModel.object = new('QhatModel.homo.normal.linear',input.data = data.frame(year=c(0),month=c(0),precipitation=c(0),flow=c(0))),
-    markov.model.object = new('markov.annualHomogeneous',transition.graph = matrix(TRUE,2,2)),
+    markov.model.object = new('markov.annualNonHomogeneous',transition.graph = matrix(TRUE,2,2)),
     calibration.results = list(optim=0,member=0),
     state.labels = c('')
   )
@@ -750,12 +751,22 @@ setMethod(f="viterbi",signature=c("hydroState","data.frame","logical","numeric",
     # Get initial states
     startProbs = getInitialStateProbabilities(.Object@markov.model.object)
     States = 1:nStates
-
     # Set probs to zero if the is no obs. data
     transProbs[is.na(transProbs)]       = 0
     #emissionProbs[is.na(emissionProbs)] = 0
     emissionProbs[!filt,] = 1
     nQhat <- nrow(data)
+
+    # Check if homogenous HMM
+    if (length(dim(transProbs))==2) {
+      isHomog = T
+    } else if (length(dim(transProbs))==3) {
+        isHomog = F
+    } else {
+      stop('Transition probs. must be a 2 or 3 dimenional array.')
+    }
+
+    message(paste('length(dim(transProbs))) :',length(dim(transProbs))))
 
     # Set zero emmision probs to machine percision
     for(state in States) {
@@ -779,17 +790,28 @@ setMethod(f="viterbi",signature=c("hydroState","data.frame","logical","numeric",
         maxi = NULL
         for(previousState in States)
         {
-          temp = v[previousState,k-1] + log(transProbs[previousState,state])
+          if (isHomog) {
+            temp = v[previousState,k-1] + log(transProbs[previousState,state])
+
+          } else {
+            temp = v[previousState,k-1] + log(transProbs[previousState,state,k])
+
+          }
           maxi = max(maxi, temp)
+
         }
         v[state,k] = log(emissionProbs[k,state]) + maxi
       }
     }
+
+    message(paste('v :',v))
     # Traceback
     viterbiPath = rep(NA,nQhat)
     for(state in States)
     {
       if(max(v[,nQhat])==v[state,nQhat])
+
+
       {
         viterbiPath[nQhat] = state
         break
@@ -799,8 +821,8 @@ setMethod(f="viterbi",signature=c("hydroState","data.frame","logical","numeric",
     {
       for(state in States)
       {
-        if(max(v[,k]+log(transProbs[,viterbiPath[k+1]]))
-           ==v[state,k]+log(transProbs[state,viterbiPath[k+1]]))
+        if(max(v[,k]+log(transProbs[,viterbiPath[k+1],k]))
+           ==v[state,k]+log(transProbs[state,viterbiPath[k+1],k]))
         {
           viterbiPath[k] = state
           break
@@ -984,7 +1006,7 @@ setMethod(f="viterbi",signature=c("hydroState","data.frame","logical","numeric",
         mtext("Precip.",side=2,line=3)
     mtext(paste("[mm/",plot.units,"]",sep=''),side=2,line=2, cex=0.85)
 
-    xaxis.ticks = as.Date(ISOdate(seq(1900,2020,by=10),1,1))
+    xaxis.ticks = as.Date(ISOdate(seq(1900,2022,by=10),1,1))
     abline(v=xaxis.ticks, col = "lightgray", lty = "dotted",lwd = par("lwd"))
     grid(NA,NULL)
     plot.range=par("usr")
@@ -1090,14 +1112,14 @@ setMethod(f="viterbi",signature=c("hydroState","data.frame","logical","numeric",
     grid(NA,NULL)
     legend('topright', legend=c('Cum. residual ',.Object@state.labels),
            lty=c(1,NA,NA),pch=c(NA,21,21), col=c('grey',state.colours),
-           pt.bg=c(NA,state.colours), xjust=0, cex=1.5, bg='white')
+           pt.bg=c(NA,state.colours), xjust=0, cex=0.7, bg='white')
 
     # Colour the points by the Viterbi state.
     for (i in 1:nQhat) {
       points(obsDates.asISO[i], P.cumResid[i],col=state.colours[viterbiPath[i]], bg=state.colours[viterbiPath[i]], pch=21)
     }
-    mtext("Cum. rainfall resid.",side=2,line=3)
-    mtext(paste("[mm]"),side=2,line=2, cex=0.85)
+    mtext("Cum. rainfall resid.",side=2,line=3, cex=0.7)
+    mtext(paste("[mm]"),side=2,line=2, cex=0.5)
     plot.range=par("usr")
     text(plot.range[1]+diff(plot.range[1:2])*0.025, plot.range[3]+diff(par("usr")[3:4])*0.95, labels="D", font=1, cex=2,pos=1)
 
@@ -1115,15 +1137,15 @@ setMethod(f="viterbi",signature=c("hydroState","data.frame","logical","numeric",
           lines(obsDates.asISO, state.probs[i,], col=state.colours[i])
         }
       }
-      mtext("State Prob.",side=2,line=3)
-      mtext(paste("[-]"),side=2,line=2, cex=0.85)
+      mtext("State Prob.",side=2,line=3, cex=0.7)
+      mtext(paste("[-]"),side=2,line=2, cex=0.5)
       mtext('Year',side=1,line=3)
-      axis(1,at= xaxis.ticks,labels=seq(1900,2020,by=10))
+      axis(1,at= xaxis.ticks,labels=seq(1900,2022,by=10))
       abline(v=xaxis.ticks, col = "lightgray", lty = "dotted",lwd = par("lwd"))
       grid(NA,NULL)
       legend('bottomleft', legend=.Object@state.labels,
              lty=c(1,1),pch=c(NA,NA), col=state.colours,lwd=1,
-             xjust=0, cex=1.5, bg='white')
+             xjust=0, cex=0.8, bg='white', x.intersp = 0.8, y.intersp = 0.8)
       plot.range=par("usr")
       text(plot.range[1]+diff(plot.range[1:2])*0.025, plot.range[3]+diff(par("usr")[3:4])*0.95, labels="E", font=1, cex=2,pos=1)
 
