@@ -9,7 +9,7 @@ library(truncnorm)
 data(streamflow_annual)
 
 # Extract one catchment
-gaugeID = 221201;
+gaugeID = 238223
 streamflow_annual = streamflow_annual[streamflow_annual$gauge==gaugeID,]
 PET_ex<-streamflow_annual$pet
 
@@ -30,7 +30,7 @@ PET_ex_adjusted <- PET_ex[(length(PET_ex) - nrow(streamflow_annual) + 1):length(
 markov_input <- cbind(year = streamflow_annual$year,
                       precipitation = streamflow_annual$precipitation,
                       PET = PET_ex_adjusted)
-markov = new('markov.annualNonHomogeneous', transition.graph=transition.graph, inputForcing=markov_input)
+markov = new('markov.annualNonHomogeneous', transition.graph=transition.graph, inputForcing=markov_input,do.Logistic.Displacement=T)
 #markov = new('markov.annualHomogeneous', transition.graph=transition.graph)
 #markov@inputForcing <- as.matrix(markov_input)
 
@@ -38,10 +38,10 @@ markov = new('markov.annualNonHomogeneous', transition.graph=transition.graph, i
 model = new('hydroState',input.data=streamflow_annual, Qhat.object=Qhat, QhatModel.object=QhatModel, markov.model.object=markov)
 
 # Fit the model using DEoptim
-model <- hydroState::fit(model,pop.size.perParameter = 10, max.generations=500)
+model <- hydroState::fit(model,pop.size.perParameter = 10, max.generations=200)
 
 # Name the states names with 1990 being defined as a 'norma' runoff year.
-model <- setStateNames(model, 1990)
+model <- setStateNames(model, c(1990,1991,1989,1992,1988,1993,1987,1994,1986))
 
 # Plot Viterbi states
 viterbi(model)

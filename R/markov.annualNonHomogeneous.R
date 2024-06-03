@@ -2,7 +2,7 @@
 ##' @export
 
 nstates = 2
-parameter.length=c(nstates,nstates,1,1,1,1,1,nstates-1)
+parameter.length=c(nstates,nstates,1,1,1,1,1,1,nstates-1)
 markov.annualNonHomogeneous <- setClass(
   # Set the name for the class
   "markov.annualNonHomogeneous",
@@ -15,19 +15,22 @@ markov.annualNonHomogeneous <- setClass(
   slots = c(
     inputForcing= "matrix",
     nstates = "numeric",  # Add a slot for nstates
-    parameter.length = "numeric"  # Add a slot for parameter.length to be set later
+    parameter.length = "numeric",  # Add a slot for parameter.length to be set later
+    do.Logistic.Displacement = "logical"
   ),
 
   # Set the default values for the slots. (optional)
   prototype=list(
     transition.graph = matrix(TRUE,2,2),
     transition.graph.parameter.index = matrix(c(1,-1,2,-1),nrow = 2,ncol=2),
-    parameter.length=c(nstates,nstates,1,1,1,1,1,nstates-1),
+    parameter.length=c(nstates,nstates,1,1,1,1,1,1,nstates-1),
     parameters = new('parameters',c('transition.prob.amp','transition.prob.lower',
-                                    'transition.prob.slope', 'transition.prob.center','transition.prob.pearson.A',
+                                    'transition.prob.slope', 'transition.prob.center','transition.prob.disp','transition.prob.pearson.A',
                                     'transition.prob.pearson.B','transition.prob.pearson.N',
                                     'initial.state.prob'),parameter.length),
-    inputForcing = matrix(NA,10,3)
+    inputForcing = matrix(NA,10,3),
+    do.Logistic.Displacement = F
+
   )
 )
 
@@ -42,7 +45,7 @@ setValidity("markov.annualNonHomogeneous", validObject)
 #setGeneric(name="initialize",def=function(.Object,transition.graph) {standardGeneric("initialize")})
 setMethod(f="initialize",
           signature="markov.annualNonHomogeneous",
-          definition = function(.Object, transition.graph = matrix(TRUE, 2, 2), inputForcing = matrix(NA, 10, 3))
+          definition = function(.Object, transition.graph = matrix(TRUE, 2, 2), do.Logistic.Displacement=F,inputForcing = matrix(NA, 10, 3))
           {
             .Object@transition.graph <- transition.graph
 
@@ -56,17 +59,17 @@ setMethod(f="initialize",
             # Set te number of transition parameters and a matrxi of indexes to them.
             #
             #.Object <- initialize.TransitionParameters(.Object)
-            parameter.length=c(nstates,nstates,1,1,1,1,1,nstates-1)
+            parameter.length=c(nstates,nstates,1,1,1,1,1,1,nstates-1)
             .Object@parameters = new('parameters',c('transition.prob.amp','transition.prob.lower',
-                                            'transition.prob.slope', 'transition.prob.center','transition.prob.pearson.A',
-                                            'transition.prob.pearson.B','transition.prob.pearson.N',
-                                            'initial.state.prob'),parameter.length)
+                                                    'transition.prob.slope', 'transition.prob.center', 'transition.prob.disp','transition.prob.pearson.A',
+                                                    'transition.prob.pearson.B','transition.prob.pearson.N',
+                                                    'initial.state.prob'),parameter.length)
 
             # Set the initial stat probs.
             .Object <- initialize.StateProbParameters(.Object)
 
             .Object@inputForcing = inputForcing
-
+            .Object@do.Logistic.Displacement = do.Logistic.Displacement
             validObject(.Object)
             return(.Object)
           }
@@ -77,18 +80,8 @@ setMethod(f="initialize",
 
 
 #' # Set the number of transition parameters and how they relate to the transition graph.
-#' setGeneric(name="initialize.TransitionParameters",def=function(.Object) {standardGeneric("initialize.TransitionParameters")})
-
-
-setGeneric(
-  name="getForcing",
-  def = function(.Object) {
-    standardGeneric("getForcing")
-  }
-)
-
 setMethod(
-  f="getForcing",
+  f="getTransitionForcing",
   signature ="markov.annualNonHomogeneous",
   definition = function(.Object) {
 
@@ -146,6 +139,48 @@ setMethod(
   }
 )
 
+setGeneric("constraintx", def = function(.Object) {standardGeneric("constraintx")})
+
+setMethod("constraintx", signature = "markov.annualNonHomogeneous",definition = function(.Object) {
+
+
+  parameters = getParameters(.Object@parameters)
+
+  forcingValues = getTransitionForcing(.Object)
+
+  b <- params@transitionProbPearsonB
+  k <- params@transitionProbPearsonN
+  a <- params@transitionProbPearsonA
+  xpeak <- (k - 1) / b
+
+  if (xpeak > 10) {
+    forcingValues[]<-Inf
+  }
+}
+)
+
+setGeneric("constraintdm", def = function(.Object) {standardGeneric("constraintdm")})
+
+setMethod("constraintdm", signature = "markov.annualNonHomogeneous",definition = function(.Object) {
+
+  parameters = getParameters(.Object@parameters)
+
+  forcingValues = getTransitionForcing(.Object)
+
+  b <- params@transitionProbPearsonB
+  k <- params@transitionProbPearsonN
+  a <- params@transitionProbPearsonA
+  xpeak <- (k-1) / b
+
+  if (b < 1/30*k) {
+    forcingValues[]<-Inf
+  }
+}
+)
+
+
+
+
 
 setGeneric(
   "applyLogistic",
@@ -159,21 +194,41 @@ setMethod(
   "applyLogistic",
   signature = "markov.annualNonHomogeneous", # or "HydroModelParameters" if you're reusing that
   definition = function(.Object) {
-
-    forcingValues = getForcing(.Object)
+    do.Logistic.Displacement = .Object@do.Logistic.Displacement
+    forcingValues = getTransitionForcing(.Object)
     forcingRange<-(max(forcingValues, na.rm =TRUE) - min(forcingValues, na.rm = TRUE))
     parameters = getParameters(.Object@parameters)
     # Extract specific parameters
-    cmdx <- parameters$transition.prob.center*forcingRange
-    slp <- parameters$transition.prob.slope / 10 * (1 - 10^-11) + 10^-11
+    cmdx <- parameters$transition.prob.center*forcingRange+min(forcingValues, na.rm = TRUE)
+    slp <- parameters$transition.prob.slope
 
     N <- length(forcingValues)
     L <- numeric(N)
 
     # Apply the logistic equation
     L <- 1 / (1 + exp(-slp * (forcingValues - cmdx)))
+
+
+
+
+    if (do.Logistic.Displacement==T){
+      disp<-c(1,L[1:length(L)-1])
+      cmdt <- parameters$transition.prob.disp*forcingRange
+      cmd <- cmdx + cmdt*(1-disp)
+      LD <- 1 / (1+exp(-slp*((forcingValues - cmd))))
+
+
+    } else{
+
+      LD <- L
+
+
+    }
+
+    Logi<- data.frame(L,LD)
+
     # Return logistic curve values
-    return(L)
+    return(Logi)
   }
 )
 
@@ -194,79 +249,47 @@ setMethod(f="getTransitionProbabilities",
 
             # Get object parameter vector
             parameters = getParameters(.Object@parameters)
-
-
+            # Get weighted forcing
+            forcingValues = getTransitionForcing(.Object)
+            # Get logistic values and its length
+            logisticValuesL = applyLogistic(.Object)$L
+            logisticValuesLD = applyLogistic(.Object)$LD
+            nT = length(forcingValues)
+            do.Logistic.Displacement = .Object@do.Logistic.Displacement
             # # Check amp and lower sum to <=1
-            # if (any(parameters$transition.prob.amp + parameters$transition.prob.lower>1)) {
+            if (any(parameters$transition.prob.amp + parameters$transition.prob.lower > 1)) {
+              return(array(Inf,c(nStates,nStates, nT)))
+            }
+
+            # if (any(parameters$transition.prob.amp + parameters$transition.prob.lower > 1)) {
+            #   parameters$transition.prob.amp[] <- Inf
+            #   parameters$transition.prob.lower[] <- Inf
             #
-            #   return(Inf)
             # }
 
-
-              for (i in 1:2){
-
-                if (any(parameters$transition.prob.amp[i] + parameters$transition.prob.lower[i]>1)){
-
-                  parameters$transition.prob.amp[] <- Inf
-                  parameters$transition.prob.lower[]<- Inf
-
-                  # Once Inf is set, no need to check further element
-                  break
-                }
-
-
-              }
-
-
-
-            # Get logistic function from weighted forcing
-            forcingValues = getForcing(.Object)
-            logisticValues = applyLogistic(.Object)
-           # message(paste('logisticValues :',length(logisticValues)))
-            # Get number of time steps from input data
-            nT = length(logisticValues)
-            #message(paste('nT',nT))
             # Initials output
             Tprob = array(0.0,c(nStates,nStates, nT))
 
-
             # Cal. vector of transition prob for first time step from amp and lower for state 1.
-            Tprob[1,1,] = logisticValues * parameters$transition.prob.amp[1] + parameters$transition.prob.lower[1]
+            Tprob[1,1,] = logisticValuesL * parameters$transition.prob.amp[1] + parameters$transition.prob.lower[1]
 
             # Cal. vector of transition prob for first time step from amp and lower for state 2.
-            Tprob[2,2,] = logisticValues * parameters$transition.prob.amp[2] + parameters$transition.prob.lower[2]
-
-            # Calc off-diagonal prbs (ie 1- that above)
+            # Tprob[1,2,] = (1-logisticValues) * parameters$transition.prob.amp[1] + parameters$transition.prob.lower[1]
             Tprob[1,2,] = 1 - Tprob[1,1,]
-            Tprob[2,1,] = 1 - Tprob[2,2,]
 
-            for (i in 1:2){
+            # Cal. vector of transition prob for first time step from amp and lower for state 1.
+            # TP: If displacement set by user, apply here to T22 and T21. This might require re-calling logistic fn
 
-              for (j in 1:2){
-
-                if (any(Tprob[i, j, ] > 1 | Tprob[i, j, ] < 0)){
-
-                  Tprob[,,] <- Inf
-                  # Once Inf is set, no need to check further elements
-                  break
-                }
-
-
-              }
-
-
+            if (do.Logistic.Displacement == T) {
+              Tprob[2, 2, ] = (1 - logisticValuesLD) * parameters$transition.prob.amp[2] + parameters$transition.prob.lower[2]
+            } else {
+              Tprob[2, 2, ] = (1 - logisticValuesL) * parameters$transition.prob.amp[2] + parameters$transition.prob.lower[2]
             }
+            Tprob[2, 1, ] = 1 - Tprob[2, 2, ]
 
-            # Check if Tprob is actually 3D
-            if (length(dim(Tprob)) < 3) {
-              stop("Tprob does not have the expected three dimensions")
-            }
 
-            #  message(paste('Tprob :',length(dim(Tprob))))
-             # message(paste('transProbs[1,1,3] :',Tprob[1,1,3]))
-            #   message(paste('anp[1] :',.Object@parameters@values$transition.prob.amp[1]))
-              # message(paste('lower[1] :',.Object@parameters@values$transition.prob.lower[1]))
-            #  message(paste('logisticValues[10] :',logisticValues[10]))
+
+
 
             return(Tprob)
           }
@@ -304,10 +327,13 @@ setMethod(f="getLogLikelihood", signature=c("markov.annualNonHomogeneous","data.
 
             # Get the transition matrix.
             Tprob = getTransitionProbabilities(.Object)
-           # message(paste('lengthTprob :',length(dim(Tprob))))
+            if (any (Tprob[,,]  == Inf))
+              return(Inf)
+
             if (length(dim(Tprob)) < 3) {
               stop("Tprob does not have the expected three dimensions")
             }
+
             # Only accept the parameters if the forward probabilities from the first to next time step show
             # that the state has not switched state after the first time step.
             P.forward <- getLogForwardProbabilities(.Object, data[1:2,], as.matrix(emission.probs[1:2,], ncol=nStates))
@@ -360,6 +386,7 @@ setMethod(f="getLogForwardProbabilities", signature=c("markov.annualNonHomogeneo
 
             # Get the transition matrix.
             Tprob = getTransitionProbabilities(.Object)
+            f=getTransitionForcing(.Object)
             if (length(dim(Tprob)) < 3) {
               stop("Tprob does not have the expected three dimensions")
             }
@@ -421,7 +448,7 @@ setMethod(f="getLogBackwardProbabilities", signature=c("markov.annualNonHomogene
             lscale     <- log(m)
             for (i in (n-1):1)
             {
-              foo        <- Tprob[,,i] %*% (as.vector(emission.probs[i+1,])*foo)
+              foo        <- Tprob[,,i+1] %*% (as.vector(emission.probs[i+1,])*foo)
               lbeta[,i]  <- log(foo)+lscale
               sumfoo     <- sum(foo)
               foo        <- foo/sumfoo
@@ -454,20 +481,24 @@ setMethod(f="getConditionalProbabilities", signature="markov.annualNonHomogeneou
             n          <- nrow(data)
             m          <- nStates
             nxc       <- dim(cumprob.atQhatIncrements)[3]
+            message(paste('cumprob.atQhatIncrements :',cumprob.atQhatIncrements))
+            message(paste('nxc :',nxc))
             dxc       <- matrix(NA,nrow=nxc,ncol=n)
-
+            message(paste('dxc :',dxc))
 
             la        <- getLogForwardProbabilities(.Object, data, emission.probs)
             lb        <- getLogBackwardProbabilities(.Object, data, emission.probs)
-
+            message(paste('la :',la))
+            message(paste('lb :',lb))
             la        <- cbind(log(alpha),la)
+            message(paste('la2 :',la))
             lafact    <- apply(la,2,max)
             lbfact    <- apply(lb,2,max)
             for (i in 1:n)
             {
               foo      <- (exp(la[,i]-lafact[i]) %*% Tprob[,,i])*exp(lb[,i]-lbfact[i])
               foo      <- foo/sum(foo)
-
+              message(paste('foo :',foo))
               # Note, Zucchini, McDonald and Langrock, 2016 code calculates the probability of a given
               # Xt outside this for-loop because the emmision probs in their model are independent of
               # time. However, here the time-varying means and auto-regressive terms make the emmision probs

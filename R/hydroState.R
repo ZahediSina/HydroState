@@ -40,6 +40,7 @@ setMethod(f="validObject",
 
           Tprob <- getTransitionProbabilities(.Object)
           P0 <- getInitialStateProbabilities(.Object)
+          f <- getTransitionForcing(.Object)
 
 
           is.valid <- T
@@ -321,6 +322,25 @@ setMethod(f="getTransitionProbabilities",
           }
 )
 
+# Get a vector of transiton probs
+setMethod(f="getTransitionForcing",signature="hydroState",  definition=function(.Object){})
+setMethod(f="getTransitionForcing",
+          signature="hydroState",
+          definition=function(.Object)
+          {
+            return(getTransitionForcing(.Object@markov.model.object))
+          }
+)
+
+
+setMethod(f="applyLogistic",signature="hydroState",  definition=function(.Object){})
+setMethod(f="applyLogistic",
+          signature="hydroState",
+          definition=function(.Object)
+          {
+            return(applyLogistic(.Object@markov.model.object))
+          }
+)
 
 # Get the model negative log liklihood.
 #' @exportMethod getNegLogLikelihood
@@ -613,6 +633,7 @@ setMethod(f="plot.graph",signature="hydroState",definition=function(.Object, mai
   # Get Transition probs. and round to 4 digits
   Tprob<- getTransitionProbabilities(.Object)
   Tprob <- round(Tprob,4)
+  f<-getTransitionForcing(.Object)
 
   # Set Tprob to -Inf where graph
   T.graph <- .Object@markov.model.object@transition.graph;
@@ -744,7 +765,7 @@ setMethod(f="viterbi",signature=c("hydroState","data.frame","logical","numeric",
   } else {
     # Get transition probs.
     transProbs = getTransitionProbabilities(.Object@markov.model.object)
-
+    f = getTransitionForcing(.Object@markov.model.object)
     # get emiision probs.
     emissionProbs = getEmissionDensity(.Object@QhatModel.object, data, NA)
 
@@ -765,8 +786,6 @@ setMethod(f="viterbi",signature=c("hydroState","data.frame","logical","numeric",
     } else {
       stop('Transition probs. must be a 2 or 3 dimenional array.')
     }
-
-    message(paste('length(dim(transProbs))) :',length(dim(transProbs))))
 
     # Set zero emmision probs to machine percision
     for(state in States) {
@@ -804,7 +823,7 @@ setMethod(f="viterbi",signature=c("hydroState","data.frame","logical","numeric",
       }
     }
 
-    message(paste('v :',v))
+
     # Traceback
     viterbiPath = rep(NA,nQhat)
     for(state in States)
@@ -821,8 +840,8 @@ setMethod(f="viterbi",signature=c("hydroState","data.frame","logical","numeric",
     {
       for(state in States)
       {
-        if(max(v[,k]+log(transProbs[,viterbiPath[k+1],k]))
-           ==v[state,k]+log(transProbs[state,viterbiPath[k+1],k]))
+        if(max(v[,k]+log(transProbs[,viterbiPath[k+1],k+1]))
+           ==v[state,k]+log(transProbs[state,viterbiPath[k+1],k+1]))
         {
           viterbiPath[k] = state
           break
@@ -1127,7 +1146,6 @@ setMethod(f="viterbi",signature=c("hydroState","data.frame","logical","numeric",
     #if (nStates>1) {
       emissionProbs = getEmissionDensity(.Object@QhatModel.object, data, NA)
       state.probs = getConditionalStateProbabilities(.Object@markov.model.object, data, emissionProbs)
-
       # Plot bar graph
       par(mar = c(4,5,0.2,5))
       plot(obsDates.asISO, state.probs[1,], type = 'l', xlim=xlim, col=state.colours[1],

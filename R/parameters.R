@@ -151,9 +151,12 @@ setMethod(f="setBounds",
                 .Object@lower.bound[[parameter.names[i]]] <- 0;
                 .Object@upper.bound[[parameter.names[i]]] <- 1;
               } else if (parameter.names[i]=='transition.prob.slope') {
-                .Object@lower.bound[[parameter.names[i]]] <- 10^-11;
+                .Object@lower.bound[[parameter.names[i]]] <- 10^-6;
                 .Object@upper.bound[[parameter.names[i]]] <- 1;
               } else if (parameter.names[i]=='transition.prob.center') {
+                .Object@lower.bound[[parameter.names[i]]] <- 0;
+                .Object@upper.bound[[parameter.names[i]]] <- 1;
+              } else if (parameter.names[i]=='transition.prob.disp') {
                 .Object@lower.bound[[parameter.names[i]]] <- 0;
                 .Object@upper.bound[[parameter.names[i]]] <- 1;
               } else if (parameter.names[i]=='transition.prob.pearson.B') {
@@ -231,6 +234,8 @@ setMethod(f="setTransforms",
               } else if (parameter.names[i]=='transition.prob.slope') {
                 .Object@use.log.transform[[parameter.names[i]]] <- F;
               } else if (parameter.names[i]=='transition.prob.center') {
+                .Object@use.log.transform[[parameter.names[i]]] <- F;
+              }else if (parameter.names[i]=='transition.prob.disp') {
                 .Object@use.log.transform[[parameter.names[i]]] <- F;
               } else if (parameter.names[i]=='transition.prob.pearson.B') {
                 .Object@use.log.transform[[parameter.names[i]]] <- F;

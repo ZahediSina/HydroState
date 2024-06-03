@@ -70,6 +70,14 @@ setMethod(f="getLogLikelihood",signature="markov",  definition=function(.Object)
 setGeneric(name="getTransitionProbabilities",def=function(.Object) {standardGeneric("getTransitionProbabilities")})
 setMethod(f="getTransitionProbabilities",signature="markov",  definition=function(.Object){})
 
+#' @exportMethod getTransitionForcing
+setGeneric(name="getTransitionForcing",def=function(.Object) {standardGeneric("getTransitionForcing")})
+setMethod(f="getTransitionForcing",signature="markov",  definition=function(.Object){})
+
+#' @exportMethod applyLogistic
+setGeneric(name="applyLogistic",def=function(.Object) {standardGeneric("applyLogistic")})
+setMethod(f="applyLogistic",signature="markov",  definition=function(.Object){})
+
 #' @exportMethod getInitialStateProbabilities
 setGeneric(name="getInitialStateProbabilities",def=function(.Object) {standardGeneric("getInitialStateProbabilities")})
 setMethod(f="getInitialStateProbabilities",signature="markov",  definition=function(.Object){})

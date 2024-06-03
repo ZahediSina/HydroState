@@ -466,7 +466,9 @@ setMethod(f="getConditionalProbabilities", signature="markov.annualHomogeneous",
             m          <- nStates
             nxc       <- dim(cumprob.atQhatIncrements)[3]
             dxc       <- matrix(NA,nrow=nxc,ncol=n)
-
+            message(paste('cumprob.atQhatIncrements :',cumprob.atQhatIncrements))
+            message(paste('nxc :',nxc))
+            message(paste('dxc :',dxc))
 
             la        <- getLogForwardProbabilities(.Object, data, emission.probs)
             lb        <- getLogBackwardProbabilities(.Object, data, emission.probs)
@@ -478,7 +480,7 @@ setMethod(f="getConditionalProbabilities", signature="markov.annualHomogeneous",
             {
               foo      <- (exp(la[,i]-lafact[i]) %*% Tprob)*exp(lb[,i]-lbfact[i])
               foo      <- foo/sum(foo)
-
+              message(paste('foo :',foo))
               # Note, Zucchini, McDonald and Langrock, 2016 code calculates the probability of a given
               # Xt outside this for-loop because the emmision probs in their model are independent of
               # time. However, here the time-varying means and auto-regressive terms make the emmision probs
@@ -532,3 +534,9 @@ setMethod(f="generate.sample.states",signature="markov.annualHomogeneous",defini
 )
 
 
+setMethod(
+  f="getTransitionForcing",
+  signature ="markov.annualHomogeneous",
+  definition = function(.Object) {
+    return(c())
+  })
