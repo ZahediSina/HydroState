@@ -515,3 +515,31 @@ setMethod(f="getConditionalProbabilities", signature="markov.annualNonHomogeneou
           }
 )
 
+
+setMethod(f="generate.sample.states",signature="markov.annualNonHomogeneous",definition=function(.Object, data)
+{
+
+  # Generate a synthtic series from the HMM states.
+  # Note, the sampling uses the transition prob. matrix to estimate the long
+  # term prob. of being in each state.
+  nStates <- getNumStates(.Object)
+  nSamples = nrow(data)
+  states = rep(0,nSamples)
+
+  # Get the initial state probabilites
+  alpha = getInitialStateProbabilities(.Object)
+
+  # Get the transition matrix.
+  Tprob = getTransitionProbabilities(.Object)
+
+  states[1] <- sample(1:nStates,1,prob=alpha)
+  for (i in 2:nSamples) {
+    alpha <- alpha %*% Tprob[,,i]
+    states[i] = sample(1:nStates,1,prob=alpha)
+  }
+
+  return(states)
+}
+)
+
+

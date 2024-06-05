@@ -840,8 +840,8 @@ setMethod(f="viterbi",signature=c("hydroState","data.frame","logical","numeric",
     {
       for(state in States)
       {
-        if(max(v[,k]+log(transProbs[,viterbiPath[k+1],k+1]))
-           ==v[state,k]+log(transProbs[state,viterbiPath[k+1],k+1]))
+        if(max(v[,k]+log(transProbs[,viterbiPath[k+1],k]))
+           ==v[state,k]+log(transProbs[state,viterbiPath[k+1],k]))
         {
           viterbiPath[k] = state
           break

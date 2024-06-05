@@ -6,10 +6,13 @@ library(DEoptim)
 library(truncnorm)
 
 # Load flow data
-data(streamflow_annual)
+#data(streamflow_annual)
+# Load flow data
+#data(streamflow_annual)
+streamflow_annual<- read.csv(file = "G:/My Drive/Annual19502022/Annualrunoff2021-22.csv",TRUE,",")
 
 # Extract one catchment
-gaugeID = 238223
+gaugeID = 238208
 streamflow_annual = streamflow_annual[streamflow_annual$gauge==gaugeID,]
 PET_ex<-streamflow_annual$pet
 
@@ -23,7 +26,7 @@ streamflow_annual = streamflow_annual[filt,]
 # each Markov state.
 transition.graph=matrix(TRUE,2,2)
 Qhat = new('Qhat.log', input.data=streamflow_annual)
-QhatModel = new('QhatModel.homo.normal.linear.AR1', input.data=streamflow_annual, transition.graph=transition.graph)
+QhatModel = new('QhatModel.homo.gamma.linear.AR1', input.data=streamflow_annual, transition.graph=transition.graph)
 
 
 PET_ex_adjusted <- PET_ex[(length(PET_ex) - nrow(streamflow_annual) + 1):length(PET_ex)]
@@ -38,10 +41,10 @@ markov = new('markov.annualNonHomogeneous', transition.graph=transition.graph, i
 model = new('hydroState',input.data=streamflow_annual, Qhat.object=Qhat, QhatModel.object=QhatModel, markov.model.object=markov)
 
 # Fit the model using DEoptim
-model <- hydroState::fit(model,pop.size.perParameter = 10, max.generations=200)
+model <- hydroState::fit(model,pop.size.perParameter = 10, max.generations=150)
 
 # Name the states names with 1990 being defined as a 'norma' runoff year.
-model <- setStateNames(model, c(1990,1991,1989,1992,1988,1993,1987,1994,1986))
+model <- setStateNames(model, 1990)
 
 # Plot Viterbi states
 viterbi(model)
