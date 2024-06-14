@@ -540,3 +540,10 @@ setMethod(
   definition = function(.Object) {
     return(c())
   })
+
+setMethod(
+  f="applyLogistic",
+  signature ="markov.annualHomogeneous",
+  definition = function(.Object) {
+    return(c())
+  })
