@@ -326,7 +326,7 @@ setMethod(f="getLogLikelihood", signature=c("markov.annualHomogeneous","data.fra
 
 # Get the log forward probabilities for the input data.
 #' @exportMethod getLogForwardProbabilities
-setGeneric(name="getLogForwardProbabilities",def=function(.Object, data, emission.probs) {standardGeneric("getLogForwardProbabilities")})
+# setGeneric(name="getLogForwardProbabilities",def=function(.Object, data, emission.probs) {standardGeneric("getLogForwardProbabilities")})
 setMethod(f="getLogForwardProbabilities", signature=c("markov.annualHomogeneous","data.frame","matrix"),
           definition=function(.Object, data, emission.probs)
           {
@@ -374,7 +374,7 @@ setMethod(f="getLogForwardProbabilities", signature=c("markov.annualHomogeneous"
 )
 
 # Get the log backward probabilities for the input data.
-setGeneric(name="getLogBackwardProbabilities",def=function(.Object, data, emission.probs) {standardGeneric("getLogBackwardProbabilities")})
+#setGeneric(name="getLogBackwardProbabilities",def=function(.Object, data, emission.probs) {standardGeneric("getLogBackwardProbabilities")})
 setMethod(f="getLogBackwardProbabilities", signature=c("markov.annualHomogeneous","data.frame","matrix"),
           definition=function(.Object, data, emission.probs)
           {

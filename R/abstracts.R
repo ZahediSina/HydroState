@@ -93,3 +93,15 @@ setMethod(f="getConditionalProbabilities",signature="markov",  definition=functi
 
 setGeneric(name="getNumStates",def=function(.Object) {standardGeneric("getNumStates")})
 setMethod(f="getNumStates",signature="markov",  definition=function(.Object){})
+
+#' @exportMethod getLogForwardProbabilities
+setGeneric(name="getLogForwardProbabilities",def=function(.Object, data, emission.probs) {standardGeneric("getLogForwardProbabilities")})
+setMethod(f="getLogForwardProbabilities", signature=c("markov","data.frame","matrix"),
+          definition=function(.Object, data, emission.probs)
+          {})
+
+#' @exportMethod getLogBackwardProbabilities
+setGeneric(name="getLogBackwardProbabilities",def=function(.Object, data, emission.probs) {standardGeneric("getLogBackwardProbabilities")})
+setMethod(f="getLogBackwardProbabilities", signature=c("markov","data.frame","matrix"),
+          definition=function(.Object, data, emission.probs)
+          {})
