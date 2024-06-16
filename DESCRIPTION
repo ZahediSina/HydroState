@@ -41,5 +41,6 @@ Collate:
     'markov.annualNonHomogeneous.R'
     'hydroState.R'
     'hydroState.allModels.R'
+    'hydroState.All2St.NHMM.R'
     'hydroState.subAnnual.allModels.R'
     'markov.annualHomogeneous.flickering.R'

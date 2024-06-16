@@ -27,7 +27,7 @@ all.Models <- new('hydroState.allModels',as.character(gaugeID), streamflow_annua
 
 # Calibrate each of the models.
 # NOTE: comment out line 30 and uncomment line 31 to apply more robust calibration settings.
-all.Models <- fit(all.Models, pop.size.perParameter=10, max.generations=500, doParallel=F)
+all.Models <- fit(all.Models, pop.size.perParameter=10, max.generations=50, doParallel=F)
 #all.Models <- fit(all.Models,pop.size.perParameter = 75,max.generations = 10000,reltol=1e-8,steptol=50, doParallel=F)
 
 # Select the best model (byt AIC)
