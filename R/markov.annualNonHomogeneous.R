@@ -21,6 +21,7 @@ markov.annualNonHomogeneous <- setClass(
 
   # Set the default values for the slots. (optional)
   prototype=list(
+    nstates = 2,
     transition.graph = matrix(TRUE,2,2),
     transition.graph.parameter.index = matrix(c(1,-1,2,-1),nrow = 2,ncol=2),
     parameter.length=c(nstates,nstates,1,1,1,1,1,1,nstates-1),

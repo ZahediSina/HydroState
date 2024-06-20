@@ -10,7 +10,7 @@ library(truncnorm)
 streamflow_annual<- read.csv(file = "G:/My Drive/Annual19502022/Annualrunoff2021-22.csv",TRUE,",")
 
 # Extract one catchment
-gaugeID = 405226
+gaugeID = 415206
 streamflow_annual = streamflow_annual[streamflow_annual$gauge==gaugeID,]
 PET_ex<-streamflow_annual$pet
 
@@ -35,7 +35,7 @@ all.Models <- new('hydroState.All2St.NHMM',as.character(gaugeID), streamflow_ann
 
 # Calibrate each of the models.
 # NOTE: comment out line 30 and uncomment line 31 to apply more robust calibration settings.
-all.Models <- fit(all.Models, pop.size.perParameter=10, max.generations=5000, doParallel=F)
+all.Models <- fit(all.Models, pop.size.perParameter=10, max.generations=1500, doParallel=F)
 #all.Models <- fit(all.Models,pop.size.perParameter = 75,max.generations = 10000,reltol=1e-8,steptol=50, doParallel=F)
 
 

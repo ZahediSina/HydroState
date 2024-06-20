@@ -402,7 +402,16 @@ setMethod(f="getAIC",signature="hydroState",definition=function(.Object)
   nll <- getNegLogLikelihood(.Object)
 
   # Get the number of parameters
-  np <- length(getParameters.asVector(.Object))
+  if ("do.Logistic.Displacement" %in% slotNames(.Object@markov.model.object)) {
+    # Your code to handle do.Logistic.Displacement
+    if (.Object@markov.model.object@do.Logistic.Displacement) {
+      np <- length(getParameters.asVector(.Object))
+    } else {
+      np <- length(getParameters.asVector(.Object))-1
+    }
+  } else {
+    np <- length(getParameters.asVector(.Object))
+  }
 
   return(2*(nll+np))
 }
@@ -416,7 +425,16 @@ setMethod(f="getAICc",signature="hydroState",definition=function(.Object)
   nll <- getNegLogLikelihood(.Object)
 
   # Get the number of parameters
-  np <- length(getParameters.asVector(.Object))
+  if ("do.Logistic.Displacement" %in% slotNames(.Object@markov.model.object)) {
+    # Your code to handle do.Logistic.Displacement
+    if (.Object@markov.model.object@do.Logistic.Displacement) {
+      np <- length(getParameters.asVector(.Object))
+    } else {
+      np <- length(getParameters.asVector(.Object))-1
+    }
+  } else {
+    np <- length(getParameters.asVector(.Object))
+  }
 
   # Calculate small sample size correction.
   n <- nrow(getQhat(.Object@Qhat.object, .Object@input.data))

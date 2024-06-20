@@ -170,50 +170,8 @@ setMethod(f="initialize",signature="hydroState.All2St.NHMM",definition=function(
 
     # model.2State.gamma.BC.S = new('hydroState',    input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.gamma    , markov.model.object=markov.2State.S),
     # model.2State.gamma.BC.AR1.S = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.gamma.AR1, markov.model.object=markov.2State.S),
-
     # model.2State.gamma.BC.AR2.S = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.gamma.AR2, markov.model.object=markov.2State.S),
     # model.2State.gamma.BC.AR3.S = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.gamma.AR3, markov.model.object=markov.2State.S)
-    #
-
-     # model.3State.log = new('hydroState',    input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.3State    , markov.model.object=markov.3State),
-    # model.3State.log.AR1 = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.3State.AR1, markov.model.object=markov.3State),
-    # model.3State.log.AR2 = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.3State.AR2, markov.model.object=markov.3State),
-    # model.3State.log.AR3 = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.3State.AR3, markov.model.object=markov.3State),
-    # #
-    # model.3State.gamma.log = new('hydroState',    input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.3State.gamma    , markov.model.object=markov.3State),
-    # model.3State.gamma.log.AR1 = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.3State.gamma.AR1, markov.model.object=markov.3State),
-    # model.3State.gamma.log.AR2 = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.3State.gamma.AR2, markov.model.object=markov.3State),
-    # model.3State.gamma.log.AR3 = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.3State.gamma.AR3, markov.model.object=markov.3State),
-    #
-    # model.3State.BC = new('hydroState',    input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.3State    , markov.model.object=markov.3State),
-    # model.3State.BC.AR1 = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.3State.AR1, markov.model.object=markov.3State),
-    # model.3State.BC.AR2 = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.3State.AR2, markov.model.object=markov.3State),
-    # model.3State.BC.AR3 = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.3State.AR3, markov.model.object=markov.3State),
-    # #
-    # model.3State.gamma.BC = new('hydroState',    input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.3State.gamma    , markov.model.object=markov.3State),
-    # model.3State.gamma.BC.AR1 = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.3State.gamma.AR1, markov.model.object=markov.3State),
-    # model.3State.gamma.BC.AR2 = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.3State.gamma.AR2, markov.model.object=markov.3State),
-    # model.3State.gamma.BC.AR3 = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.3State.gamma.AR3, markov.model.object=markov.3State),
-    #
-    # model.3StateUS.log = new('hydroState',    input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.3State    , markov.model.object=markov.3State.US),
-    # model.3StateUS.log.AR1 = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.3State.AR1, markov.model.object=markov.3State.US),
-    # model.3StateUS.log.AR2 = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.3State.AR2, markov.model.object=markov.3State.US),
-    # model.2StateUS.log.AR3 = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.3State.AR3, markov.model.object=markov.3State.US),
-    #
-    # model.3StateUS.gamma.log = new('hydroState',    input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.3State.gamma    , markov.model.object=markov.3State.US),
-    # model.3StateUS.gamma.log.AR1 = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.3State.gamma.AR1, markov.model.object=markov.3State.US),
-    # model.3StateUS.gamma.log.AR2 = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.3State.gamma.AR2, markov.model.object=markov.3State.US),
-    # model.3StateUS.gamma.log.AR3 = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.3State.gamma.AR3, markov.model.object=markov.3State.US),
-    # #
-    # model.3StateUS.BC = new('hydroState',    input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.3State    , markov.model.object=markov.3State.US),
-    # model.3StateUS.BC.AR1 = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.3State.AR1, markov.model.object=markov.3State.US),
-    # model.3StateUS.BC.AR2 = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.3State.AR2, markov.model.object=markov.3State.US),
-    # model.3StateUS.BC.AR3 = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.3State.AR3, markov.model.object=markov.3State.US),
-    # #
-    # model.3StateUS.gamma.BC = new('hydroState',    input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.3State.gamma    , markov.model.object=markov.3State.US),
-    # model.3StateUS.gamma.BC.AR1 = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.3State.gamma.AR1, markov.model.object=markov.3State.US),
-    # model.3StateUS.gamma.BC.AR2 = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.3State.gamma.AR2, markov.model.object=markov.3State.US),
-    # model.3StateUS.gamma.BC.AR3 = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.3State.gamma.AR3, markov.model.object=markov.3State.US)
     #
   )
 
@@ -230,7 +188,6 @@ setMethod(f="initialize",signature="hydroState.All2St.NHMM",definition=function(
     # model.1State.gamma.log.AR3 = 'model.1State.gamma.log.AR2',
     #
     model.1State.BC = 'model.1State.log',
-    model.1State.BC = '',
     model.1State.BC.AR1 = 'model.1State.BC',
     model.1State.BC.AR2 = 'model.1State.BC.AR1',
     model.1State.BC.AR3 = 'model.1State.BC.AR2',
@@ -288,47 +245,6 @@ setMethod(f="initialize",signature="hydroState.All2St.NHMM",definition=function(
     #
 
 
-
-    # model.3State.log = 'model.2State.log',
-    # model.3State.log.AR1 = 'model.3State.log',
-    # model.3State.log.AR2 = 'model.3State.log.AR1',
-    # model.3State.log.AR3 = 'model.3State.log.AR2',
-    #
-    # model.3State.gamma.log = 'model.3State.log',
-    # model.3State.gamma.log.AR1 = 'model.3State.gamma.log',
-    # model.3State.gamma.log.AR2 = 'model.3State.gamma.log.AR1',
-    # model.3State.gamma.log.AR3 = 'model.3State.gamma.log.AR2',
-    #
-    # model.3State.BC = 'model.3State.log',
-    # model.3State.BC = 'model.2State.BC',
-    # model.3State.BC.AR1 = 'model.3State.BC',
-    # model.3State.BC.AR2 = 'model.3State.BC.AR1',
-    # model.3State.BC.AR3 = 'model.3State.BC.AR2',
-    #
-    # model.3State.gamma.BC = 'model.3State.BC',
-    # model.3State.gamma.BC.AR1 = 'model.3State.gamma.BC',
-    # model.3State.gamma.BC.AR2 = 'model.3State.gamma.BC.AR1',
-    # model.3State.gamma.BC.AR3 = 'model.3State.gamma.BC.AR2',
-    #
-    # model.3StateUS.log = 'model.3State.log',
-    # model.3StateUS.log.AR1 = 'model.3StateUS.log',
-    # model.3StateUS.log.AR2 = 'model.3StateUS.log.AR1',
-    # model.2StateUS.log.AR3 = 'model.3StateUS.log.AR2',
-    #
-    # model.3StateUS.gamma.log = 'model.3StateUS.log',
-    # model.3StateUS.gamma.log.AR1 = 'model.3StateUS.gamma.log',
-    # model.3StateUS.gamma.log.AR2 = 'model.3StateUS.gamma.log.AR1',
-    # model.3StateUS.gamma.log.AR3 = 'model.3StateUS.gamma.log.AR2',
-    #
-    # model.3StateUS.BC = 'model.3State.BC',
-    # model.3StateUS.BC.AR1 = 'model.3StateUS.BC',
-    # model.3StateUS.BC.AR2 = 'model.3StateUS.BC.AR1',
-    # model.3StateUS.BC.AR3 = 'model.3StateUS.BC.AR2',
-    #
-    # model.3StateUS.gamma.BC = 'model.3StateUS.BC',
-    # model.3StateUS.gamma.BC.AR1 = 'model.3StateUS.gamma.BC',
-    # model.3StateUS.gamma.BC.AR2 = 'model.3StateUS.gamma.BC.AR1',
-    # model.3StateUS.gamma.BC.AR3 = 'model.3StateUS.gamma.BC.AR2'
   )
 
   model.names = names(.Object@models)
@@ -499,7 +415,19 @@ setMethod(f="getAIC",signature="hydroState.All2St.NHMM",definition=function(.Obj
   nParameters <- rep(Inf, nModels)
   names(nParameters) <- model.names
   for (i in 1:nModels)
-    nParameters[i] <- length(getParameters.asVector(.Object@models[[i]]))
+
+    # Get the number of parameters
+    if ("do.Logistic.Displacement" %in% slotNames(.Object@models[[i]]@markov.model.object)) {
+      # Your code to handle do.Logistic.Displacement
+      if (.Object@models[[i]]@markov.model.object@do.Logistic.Displacement) {
+        nParameters[i] <- length(getParameters.asVector(.Object@models[[i]]))
+      } else {
+        nParameters[i] <- length(getParameters.asVector(.Object@models[[i]]))-1
+      }
+    } else {
+      nParameters[i] <- length(getParameters.asVector(.Object@models[[i]]))
+    }
+
 
   # Building a matrix of AIC and nParams.
   AIC <- cbind(AIC, nParameters)
@@ -518,6 +446,7 @@ setMethod(f="getAIC",signature="hydroState.All2St.NHMM",definition=function(.Obj
 )
 
 
+
 # Get best model (by mimimum AIC)
 #' @exportMethod getAIC.bestModel
 setGeneric(name="getAIC.bestModel",def=function(.Object, use.calib.reference.criteria=NA, use.sampleSize.penality=NA,min.obs.per.state=NA) {standardGeneric("getAIC.bestModel")})
@@ -525,11 +454,9 @@ setMethod(f="getAIC.bestModel",signature="hydroState.All2St.NHMM",definition=fun
 {
   # Get AIC
   model.names <- names(.Object@models)
-  message(paste('model.names: ',model.names))
   nModels <- length(model.names)
-  message(paste('nModels: ', nModels))
   AIC <- getAIC(.Object, plot.data=F, use.sampleSize.penality)
-  message(paste('AIC: ', AIC))
+
   # Build filt to models that met calib. criteria
   filt = rep(T, nModels)
   if (use.calib.reference.criteria) {
@@ -541,10 +468,9 @@ setMethod(f="getAIC.bestModel",signature="hydroState.All2St.NHMM",definition=fun
     }
   }
   AIC <- AIC[filt,]
-  message(paste('AIC: ', AIC))
+
   # Filter out models that have a non-finite AIC.
   nModels <- nrow(AIC)
-  message(paste('nModels:', nModels))
   filt = rep(F, nModels)
   for (i in 1:nModels) {
     if(is.finite(AIC[i,1]))
@@ -606,9 +532,10 @@ setMethod(f="getAIC.bestModel",signature="hydroState.All2St.NHMM",definition=fun
   # Get the best model
   bestModel <- .Object@models[[bestModel.name]]
 
-  # # Get the best 1 state model
-   bestModel.1State <- .Object@models[[bestModel.1State.name]]
+  # Get the best 1 state model
+  bestModel.1State <- .Object@models[[bestModel.1State.name]]
 
   return(list(model=bestModel, model.best1State = bestModel.1State, AIC=AIC, evidenceRatio.oneState=EF.oneState))
 }
 )
+
