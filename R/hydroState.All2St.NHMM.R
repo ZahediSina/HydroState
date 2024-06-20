@@ -9,6 +9,7 @@ hydroState.All2St.NHMM <- setClass(
   # Define the slots
   slots = c(
     siteID= 'character',
+    markov_input= "matrix",
     calib.reference.model.name = 'list',
     calib.reference.criteria.met = 'logical',
     models = 'list'
@@ -20,7 +21,8 @@ hydroState.All2St.NHMM <- setClass(
     siteID = '(not set)',
     calib.reference.model.name= vector('list',1),
     calib.reference.criteria.met= vector('logical',1),
-    models  = vector('list',1)
+    models  = vector('list',1),
+    markov_input= matrix(NA,10,3)
   )
 )
 
@@ -32,10 +34,11 @@ setValidity("hydroState.All2St.NHMM", validObject)
 
 # Initialise the object.
 #setGeneric(name="initialize",def=function(.Object,input.data, Qhat.object, QhatModel.object, markov.model.object, ...){standardGeneric("initialize")})
-setMethod(f="initialize",signature="hydroState.All2St.NHMM",definition=function(.Object, siteID, input.data, allow.flickering=F, state.dependent.mean.trend=NA)
+setMethod(f="initialize",signature="hydroState.All2St.NHMM",definition=function(.Object, siteID, input.data, markov_input, state.dependent.mean.trend=NA)
 {
 
   .Object@siteID <- siteID
+  .Object@markov_input <- markov_input
 
   # Define transition graphs
   transition.graph.1State <- matrix(TRUE,1,1)
@@ -52,11 +55,8 @@ setMethod(f="initialize",signature="hydroState.All2St.NHMM",definition=function(
 
   # Check if flickering between states is allows
   model.extension=''
-  if (allow.flickering) {
-    model.extension.markov = '.flickering'
-  } else {
-    model.extension.markov = ''
-  }
+
+
 
   # Build Qhat models
   QhatModel.1State = new(paste('QhatModel.homo.normal.linear',model.extension,sep=''), input.data=input.data,state.dependent.mean.trend=state.dependent.mean.trend,  transition.graph=transition.graph.1State)
@@ -102,9 +102,10 @@ setMethod(f="initialize",signature="hydroState.All2St.NHMM",definition=function(
   # # Build Markov model object
   # markov.1State = new(paste('markov.annualHomogeneous',model.extension.markov,sep=''), transition.graph=transition.graph.1State)
 
-  markov.1State = new(paste('markov.annualHomogeneous',model.extension.markov,sep=''), transition.graph=transition.graph.1State)
-  markov.2State.D = new(paste('markov.annualNonHomogeneous',model.extension.markov,sep=''), transition.graph=transition.graph.2State,inputForcing=markov_input,do.Logistic.Displacement=T)
-  markov.2State.S = new(paste('markov.annualNonHomogeneous',model.extension.markov,sep=''), transition.graph=transition.graph.2State, inputForcing=markov_input,do.Logistic.Displacement=F)
+  markov.1State = new('markov.annualHomogeneous', transition.graph=transition.graph.1State)
+  markov.2State.S = new('markov.annualNonHomogeneous', transition.graph=transition.graph.2State,inputForcing=markov_input,do.Logistic.Displacement=F)
+  markov.2State.D = new('markov.annualNonHomogeneous', transition.graph=transition.graph.2State,inputForcing=markov_input,do.Logistic.Displacement=T)
+
 
 
   # markov.3State = new(paste('markov.annualHomogeneous',model.extension.markov,sep=''), transition.graph=transition.graph.3State)
@@ -133,26 +134,6 @@ setMethod(f="initialize",signature="hydroState.All2St.NHMM",definition=function(
     # model.1State.gamma.BC.AR2 = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.1State.gamma.AR2, markov.model.object=markov.1State),
     # model.1State.gamma.BC.AR3 = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.1State.gamma.AR3, markov.model.object=markov.1State),
     #
-    model.2State.log.D = new('hydroState',    input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.2State    , markov.model.object=markov.2State.D),
-    model.2State.log.AR1.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.2State.AR1, markov.model.object=markov.2State.D),
-    model.2State.log.AR2.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.2State.AR2, markov.model.object=markov.2State.D),
-    model.2State.log.AR3.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.2State.AR3, markov.model.object=markov.2State.D),
-
-    # model.2State.gamma.log.D = new('hydroState',    input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.2State.gamma    , markov.model.object=markov.2State.D),
-    # model.2State.gamma.log.AR1.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.2State.gamma.AR1, markov.model.object=markov.2State.D),
-    # model.2State.gamma.log.AR2.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.2State.gamma.AR2, markov.model.object=markov.2State.D),
-    # model.2State.gamma.log.AR3.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.2State.gamma.AR3, markov.model.object=markov.2State.D),
-
-     model.2State.BC.D = new('hydroState',    input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State    , markov.model.object=markov.2State.D),
-     model.2State.BC.AR1.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.AR1, markov.model.object=markov.2State.D),
-     model.2State.BC.AR2.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.AR2, markov.model.object=markov.2State.D),
-     model.2State.BC.AR3.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.AR3, markov.model.object=markov.2State.D),
-
-     # model.2State.gamma.BC.D = new('hydroState',    input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.gamma    , markov.model.object=markov.2State.D),
-     # model.2State.gamma.BC.AR1.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.gamma.AR1, markov.model.object=markov.2State.D),
-     # model.2State.gamma.BC.AR2.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.gamma.AR2, markov.model.object=markov.2State.D),
-     # model.2State.gamma.BC.AR3.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.gamma.AR3, markov.model.object=markov.2State.D),
-
     model.2State.log.S = new('hydroState',    input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.2State    , markov.model.object=markov.2State.S),
     model.2State.log.AR1.S = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.2State.AR1, markov.model.object=markov.2State.S),
     model.2State.log.AR2.S = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.2State.AR2, markov.model.object=markov.2State.S),
@@ -166,13 +147,34 @@ setMethod(f="initialize",signature="hydroState.All2St.NHMM",definition=function(
     model.2State.BC.S = new('hydroState',    input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State    , markov.model.object=markov.2State.S),
     model.2State.BC.AR1.S = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.AR1, markov.model.object=markov.2State.S),
     model.2State.BC.AR2.S = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.AR2, markov.model.object=markov.2State.S),
-    model.2State.BC.AR3.S = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.AR3, markov.model.object=markov.2State.S)
+    model.2State.BC.AR3.S = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.AR3, markov.model.object=markov.2State.S),
 
     # model.2State.gamma.BC.S = new('hydroState',    input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.gamma    , markov.model.object=markov.2State.S),
     # model.2State.gamma.BC.AR1.S = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.gamma.AR1, markov.model.object=markov.2State.S),
     # model.2State.gamma.BC.AR2.S = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.gamma.AR2, markov.model.object=markov.2State.S),
-    # model.2State.gamma.BC.AR3.S = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.gamma.AR3, markov.model.object=markov.2State.S)
+    # model.2State.gamma.BC.AR3.S = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.gamma.AR3, markov.model.object=markov.2State.S),
     #
+    model.2State.log.D = new('hydroState',    input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.2State    , markov.model.object=markov.2State.D),
+    model.2State.log.AR1.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.2State.AR1, markov.model.object=markov.2State.D),
+    model.2State.log.AR2.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.2State.AR2, markov.model.object=markov.2State.D),
+    model.2State.log.AR3.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.2State.AR3, markov.model.object=markov.2State.D),
+
+    # model.2State.gamma.log.D = new('hydroState',    input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.2State.gamma    , markov.model.object=markov.2State.D),
+    # model.2State.gamma.log.AR1.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.2State.gamma.AR1, markov.model.object=markov.2State.D),
+    # model.2State.gamma.log.AR2.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.2State.gamma.AR2, markov.model.object=markov.2State.D),
+    # model.2State.gamma.log.AR3.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.log, QhatModel.object = QhatModel.2State.gamma.AR3, markov.model.object=markov.2State.D),
+
+    model.2State.BC.D = new('hydroState',    input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State    , markov.model.object=markov.2State.D),
+    model.2State.BC.AR1.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.AR1, markov.model.object=markov.2State.D),
+    model.2State.BC.AR2.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.AR2, markov.model.object=markov.2State.D),
+    model.2State.BC.AR3.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.AR3, markov.model.object=markov.2State.D)
+
+    # model.2State.gamma.BC.D = new('hydroState',    input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.gamma    , markov.model.object=markov.2State.D),
+    # model.2State.gamma.BC.AR1.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.gamma.AR1, markov.model.object=markov.2State.D),
+    # model.2State.gamma.BC.AR2.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.gamma.AR2, markov.model.object=markov.2State.D),
+    # model.2State.gamma.BC.AR3.D = new('hydroState',input.data=input.data, Qhat.object = Qhat.boxcox, QhatModel.object = QhatModel.2State.gamma.AR3, markov.model.object=markov.2State.D)
+
+
   )
 
   # Define Refernce models. That is, the calibration obecjive function that this models needs to meet or exceed.
@@ -197,7 +199,27 @@ setMethod(f="initialize",signature="hydroState.All2St.NHMM",definition=function(
     # model.1State.gamma.BC.AR2 = 'model.1State.gamma.BC.AR1',
     # model.1State.gamma.BC.AR3 = 'model.1State.gamma.BC.AR2',
     #
-    model.2State.log.D = 'model.1State.log',
+    model.2State.log.S = 'model.1State.log',
+    model.2State.log.AR1.S = 'model.2State.log.S',
+    model.2State.log.AR2.S = 'model.2State.log.AR1.S',
+    model.2State.log.AR3.S = 'model.2State.log.AR2.S',
+    # model.2State.gamma.log.S = 'model.2State.log.S',
+    # model.2State.gamma.log.AR1.S = 'model.2State.gamma.log.S',
+    # model.2State.gamma.log.AR2.S = 'model.2State.gamma.log.AR1.S',
+    # model.2State.gamma.log.AR3.S = 'model.2State.gamma.log.AR2.S',
+    model.2State.BC.S = 'model.1State.BC',
+    model.2State.BC.S = 'model.2State.log.S',
+    model.2State.BC.AR1.S = 'model.2State.BC.S',
+    model.2State.BC.AR2.S = 'model.2State.BC.AR1.S',
+    model.2State.BC.AR3.S = 'model.2State.BC.AR2.S',
+    #
+    # model.2State.gamma.BC.S = '',
+    # model.2State.gamma.BC.S = 'model.2State.BC.S',
+    # model.2State.gamma.BC.AR1.S = 'model.2State.gamma.BC.S',
+    # model.2State.gamma.BC.AR2.S = 'model.2State.gamma.BC.AR1.S',
+    # model.2State.gamma.BC.AR3.S = 'model.2State.gamma.BC.AR2.S'
+    #
+    model.2State.log.D = 'model.2State.log.S',
     model.2State.log.AR1.D = 'model.2State.log.D',
     model.2State.log.AR2.D = 'model.2State.log.AR1.D',
     model.2State.log.AR3.D = 'model.2State.log.AR2.D',
@@ -207,11 +229,11 @@ setMethod(f="initialize",signature="hydroState.All2St.NHMM",definition=function(
     # model.2State.gamma.log.AR2.D = 'model.2State.gamma.log.AR1.D',
     # model.2State.gamma.log.AR3.D = 'model.2State.gamma.log.AR2.D'
 
-    model.2State.BC.D = 'model.1State.BC',
+    model.2State.BC.D = 'model.2State.BC.S',
     model.2State.BC.D = 'model.2State.log.D',
     model.2State.BC.AR1.D = 'model.2State.BC.D',
     model.2State.BC.AR2.D = 'model.2State.BC.AR1.D',
-    model.2State.BC.AR3.D = 'model.2State.BC.AR2.D',
+    model.2State.BC.AR3.D = 'model.2State.BC.AR2.D'
 
     # model.2State.gamma.BC.D = '',
     # model.2State.gamma.BC.D = 'model.2State.BC.D',
@@ -219,30 +241,6 @@ setMethod(f="initialize",signature="hydroState.All2St.NHMM",definition=function(
     # model.2State.gamma.BC.AR2.D = 'model.2State.gamma.BC.AR1.D',
     # model.2State.gamma.BC.AR3.D = 'model.2State.gamma.BC.AR2.D',
 
-
-    model.2State.log.S = 'model.1State.log',
-    model.2State.log.AR1.S = 'model.2State.log.S',
-    model.2State.log.AR2.S = 'model.2State.log.AR1.S',
-    model.2State.log.AR3.S = 'model.2State.log.AR2.S',
-
-    # model.2State.gamma.log.S = 'model.2State.log.S',
-    # model.2State.gamma.log.AR1.S = 'model.2State.gamma.log.S',
-    # model.2State.gamma.log.AR2.S = 'model.2State.gamma.log.AR1.S',
-    # model.2State.gamma.log.AR3.S = 'model.2State.gamma.log.AR2.S',
-
-    model.2State.BC.S = 'model.1State.BC',
-    model.2State.BC.S = 'model.2State.log.S',
-    model.2State.BC.AR1.S = 'model.2State.BC.S',
-    model.2State.BC.AR2.S = 'model.2State.BC.AR1.S',
-    model.2State.BC.AR3.S = 'model.2State.BC.AR2.S'
-
-    # model.2State.gamma.BC.S = '',
-    # model.2State.gamma.BC.S = 'model.2State.BC.S',
-    # model.2State.gamma.BC.AR1.S = 'model.2State.gamma.BC.S',
-
-    # model.2State.gamma.BC.AR2.S = 'model.2State.gamma.BC.AR1.S',
-    # model.2State.gamma.BC.AR3.S = 'model.2State.gamma.BC.AR2.S'
-    #
 
 
   )
@@ -259,14 +257,14 @@ setMethod(f="initialize",signature="hydroState.All2St.NHMM",definition=function(
 )
 
 setMethod(f = "fit",signature="hydroState.All2St.NHMM",definition=function(.Object,
-                                                                         pop.size.perParameter=25,
-                                                                         max.generations=10000,
-                                                                         Domains,
-                                                                         reltol=1e-8,
-                                                                         steptol=50,
-                                                                         print.iterations = 25,
-                                                                         doParallel=F,
-                                                                         ...)
+                                                                           pop.size.perParameter=25,
+                                                                           max.generations=10000,
+                                                                           Domains,
+                                                                           reltol=1e-8,
+                                                                           steptol=50,
+                                                                           print.iterations = 25,
+                                                                           doParallel=F,
+                                                                           ...)
 {
 
   # Set the min and max numbe rof calibrations per model
