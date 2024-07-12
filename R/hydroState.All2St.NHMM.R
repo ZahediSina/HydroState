@@ -220,9 +220,9 @@ setMethod(f="initialize",signature="hydroState.All2St.NHMM",definition=function(
     # model.2State.gamma.BC.AR3.S = 'model.2State.gamma.BC.AR2.S'
     #
     model.2State.log.D = 'model.2State.log.S',
-    model.2State.log.AR1.D = 'model.2State.log.D',
-    model.2State.log.AR2.D = 'model.2State.log.AR1.D',
-    model.2State.log.AR3.D = 'model.2State.log.AR2.D',
+    model.2State.log.AR1.D = 'model.2State.log.AR1.S',
+    model.2State.log.AR2.D = 'model.2State.log.AR2.S',
+    model.2State.log.AR3.D = 'model.2State.log.AR3.S',
 
     # model.2State.gamma.log.D = 'model.2State.log.D',
     # model.2State.gamma.log.AR1.D = 'model.2State.gamma.log.D',
@@ -231,9 +231,9 @@ setMethod(f="initialize",signature="hydroState.All2St.NHMM",definition=function(
 
     model.2State.BC.D = 'model.2State.BC.S',
     model.2State.BC.D = 'model.2State.log.D',
-    model.2State.BC.AR1.D = 'model.2State.BC.D',
-    model.2State.BC.AR2.D = 'model.2State.BC.AR1.D',
-    model.2State.BC.AR3.D = 'model.2State.BC.AR2.D'
+    model.2State.BC.AR1.D = 'model.2State.BC.AR1.S',
+    model.2State.BC.AR2.D = 'model.2State.BC.AR2.S',
+    model.2State.BC.AR3.D = 'model.2State.BC.AR3.S'
 
     # model.2State.gamma.BC.D = '',
     # model.2State.gamma.BC.D = 'model.2State.BC.D',
@@ -267,24 +267,37 @@ setMethod(f = "fit",signature="hydroState.All2St.NHMM",definition=function(.Obje
                                                                            ...)
 {
 
-  # Set the min and max numbe rof calibrations per model
-  minTrialsPerModel=1
-  maxTrialsPerModel=3
+
 
 
   model.names <- names(.Object@models)
   nModels = length(.Object@models)
 
   message(paste('Calibrating ',nModels,'Models.'))
-  message(paste('... Minimum number of calibration per model: ',minTrialsPerModel))
-  message(paste('... Maximum number of calibration per model: ',maxTrialsPerModel))
+ # message(paste('... Minimum number of calibration per model: ',minTrialsPerModel))
+ # message(paste('... Maximum number of calibration per model: ',maxTrialsPerModel))
 
   for (i in 1:nModels) {
+
 
     # Get reference model calibration result.
     current.model.name <- model.names[i]
     ref.model.name <- .Object@calib.reference.model.name[[current.model.name]]
     #message(paste('ref.model.name ',ref.model.name))
+
+    if (grepl("\\.D$", current.model.name)){
+      # Set the min and max numbe rof calibrations per model
+      minTrialsPerModel=4
+      maxTrialsPerModel=30
+    } else{
+
+      minTrialsPerModel=4
+      maxTrialsPerModel=20
+
+    }
+
+
+
 
     if (nchar(ref.model.name)==0){
       max.calib.result=-Inf
@@ -307,31 +320,90 @@ setMethod(f = "fit",signature="hydroState.All2St.NHMM",definition=function(.Obje
     #(j<minTrialsPerModel || ((j<maxTrialsPerModel) && (current.model.err>max.calib.result)))
 
     j=1
-    while (j<=minTrialsPerModel || (j<maxTrialsPerModel && current.model.err>max.calib.result)){
-      DEstrategy <- sample(c(2,3),1,replace=T)
-      message('')
-      message(paste('... Doing Calibration Trial ',j, ' using DEstrategy:',DEstrategy))
+    if (grepl("\\.D$", current.model.name)){
 
-      # Get number of params
-      nParams = length(getParameters.asVector(.Object@models[[i]]))
+      while (j<=minTrialsPerModel || (j<maxTrialsPerModel && current.model.err>(max.calib.result))){
+        DEstrategy <- sample(c(2,3),1,replace=T)
+        message('')
+        message(paste('... Doing Calibration Trial ',j, ' using DEstrategy:',DEstrategy))
 
-      if (nParams>=doParallel || doParallel==T) {
-        model <- .Object@models[[i]]
-        assign("model", model, envir=globalenv())
-        model <- fit(model, DEstrategy=DEstrategy, pop.size.perParameter=pop.size.perParameter, max.generations=max.generations, reltol=reltol, steptol=steptol, print.iterations=print.iterations,
-                     parallelType=1, packages = c('hydroState','truncnorm'),parVar=c('model'))
-      } else {
-        model <- fit(.Object@models[[i]], DEstrategy=DEstrategy, pop.size.perParameter=pop.size.perParameter, max.generations=max.generations, reltol=reltol, steptol=steptol, print.iterations=print.iterations)
+        # Get number of params
+        nParams = length(getParameters.asVector(.Object@models[[i]]))
+
+        if (nParams>=doParallel || doParallel==T) {
+          model <- .Object@models[[i]]
+          assign("model", model, envir=globalenv())
+          model <- fit(model, DEstrategy=DEstrategy, pop.size.perParameter=pop.size.perParameter, max.generations=max.generations, reltol=reltol, steptol=steptol, print.iterations=print.iterations,
+                       parallelType=1, packages = c('hydroState','truncnorm'),parVar=c('model'))
+        } else {
+          model <- fit(.Object@models[[i]], DEstrategy=DEstrategy, pop.size.perParameter=pop.size.perParameter, max.generations=max.generations, reltol=reltol, steptol=steptol, print.iterations=print.iterations)
+        }
+
+        # Store the best model to date int the object in case the reference maximum obj cannot be met.
+        if (model@calibration.results$bestval <= current.model.err) {
+          .Object@models[[i]] <- model
+          current.model.err <- model@calibration.results$bestval
+        }
+
+        j <- j+1
+      }
+    }  else if (grepl("\\.S$", current.model.name)){
+
+      while (j<=minTrialsPerModel || (j<maxTrialsPerModel && current.model.err>(max.calib.result))){
+        DEstrategy <- sample(c(2,3),1,replace=T)
+        message('')
+        message(paste('... Doing Calibration Trial ',j, ' using DEstrategy:',DEstrategy))
+
+        # Get number of params
+        nParams = length(getParameters.asVector(.Object@models[[i]]))
+
+        if (nParams>=doParallel || doParallel==T) {
+          model <- .Object@models[[i]]
+          assign("model", model, envir=globalenv())
+          model <- fit(model, DEstrategy=DEstrategy, pop.size.perParameter=pop.size.perParameter, max.generations=max.generations, reltol=reltol, steptol=steptol, print.iterations=print.iterations,
+                       parallelType=1, packages = c('hydroState','truncnorm'),parVar=c('model'))
+        } else {
+          model <- fit(.Object@models[[i]], DEstrategy=DEstrategy, pop.size.perParameter=pop.size.perParameter, max.generations=max.generations, reltol=reltol, steptol=steptol, print.iterations=print.iterations)
+        }
+
+        # Store the best model to date int the object in case the reference maximum obj cannot be met.
+        if (model@calibration.results$bestval <= current.model.err) {
+          .Object@models[[i]] <- model
+          current.model.err <- model@calibration.results$bestval
+        }
+
+        j <- j+1
+      }
+    } else {
+
+      while (j<=minTrialsPerModel || (j<maxTrialsPerModel && current.model.err>max.calib.result)){
+        DEstrategy <- sample(c(2,3),1,replace=T)
+        message('')
+        message(paste('... Doing Calibration Trial ',j, ' using DEstrategy:',DEstrategy))
+
+        # Get number of params
+        nParams = length(getParameters.asVector(.Object@models[[i]]))
+
+        if (nParams>=doParallel || doParallel==T) {
+          model <- .Object@models[[i]]
+          assign("model", model, envir=globalenv())
+          model <- fit(model, DEstrategy=DEstrategy, pop.size.perParameter=pop.size.perParameter, max.generations=max.generations, reltol=reltol, steptol=steptol, print.iterations=print.iterations,
+                       parallelType=0, packages = c('hydroState','truncnorm'),parVar=c('model'))
+        } else {
+          model <- fit(.Object@models[[i]], DEstrategy=DEstrategy, pop.size.perParameter=pop.size.perParameter, max.generations=max.generations, reltol=reltol, steptol=steptol, print.iterations=print.iterations)
+        }
+
+        # Store the best model to date int the object in case the reference maximum obj cannot be met.
+        if (model@calibration.results$bestval <= current.model.err) {
+          .Object@models[[i]] <- model
+          current.model.err <- model@calibration.results$bestval
+        }
+
+        j <- j+1
       }
 
-      # Store the best model to date int the object in case the reference maximum obj cannot be met.
-      if (model@calibration.results$bestval <= current.model.err) {
-        .Object@models[[i]] <- model
-        current.model.err <- model@calibration.results$bestval
-      }
-
-      j <- j+1
     }
+
 
     if (current.model.err<=max.calib.result) {
       .Object@calib.reference.criteria.met[[current.model.name]] = T
@@ -414,18 +486,16 @@ setMethod(f="getAIC",signature="hydroState.All2St.NHMM",definition=function(.Obj
   names(nParameters) <- model.names
   for (i in 1:nModels)
 
+
     # Get the number of parameters
     if ("do.Logistic.Displacement" %in% slotNames(.Object@models[[i]]@markov.model.object)) {
       # Your code to handle do.Logistic.Displacement
-      if (.Object@models[[i]]@markov.model.object@do.Logistic.Displacement) {
-        nParameters[i] <- length(getParameters.asVector(.Object@models[[i]]))
-      } else {
+
         nParameters[i] <- length(getParameters.asVector(.Object@models[[i]]))-1
-      }
+
     } else {
       nParameters[i] <- length(getParameters.asVector(.Object@models[[i]]))
     }
-
 
   # Building a matrix of AIC and nParams.
   AIC <- cbind(AIC, nParameters)

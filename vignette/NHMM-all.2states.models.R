@@ -44,7 +44,7 @@ best.model = getAIC.bestModel(all.Models)
 
 # Name the states names with 1990 being defined as a 'normal' runoff year.
 best.model1 <- setStateNames(best.model[["model"]], c(1990, 1989, 1991, 1988, 1992))
-
+best.model1<- setStateNames(all.Models@models[["model.2State.BC.AR1.S"]], c(1990, 1989, 1991, 1988, 1992))
 # Plot Viterbi states
 viterbi(best.model1)
 
