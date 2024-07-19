@@ -213,8 +213,9 @@ setMethod(
 
 
     if (do.Logistic.Displacement==T){
+      disp<-c(1,L[1:length(L)-1])
       cmdt <- parameters$transition.prob.disp*forcingRange
-      cmd <- cmdx + cmdt*(1-cmdx)
+      cmd <- cmdx + cmdt*(1-disp)
       LD <- 1 / (1+exp(-slp*((forcingValues - cmd))))
 
 
