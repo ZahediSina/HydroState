@@ -1044,7 +1044,7 @@ setMethod(f="viterbi",signature=c("hydroState","data.frame","logical","numeric",
 
               # Change graphics settings
               nrow.plots = 5
-              layout(matrix(c(1,2,2,2,3,3,4,5), 8, 1, byrow = TRUE))
+              layout(matrix(c(1,2,2,2,3), 5, 1, byrow = TRUE))
               par(mar = c(0.2,5,0.2,5))
 
 
@@ -1117,42 +1117,42 @@ setMethod(f="viterbi",signature=c("hydroState","data.frame","logical","numeric",
               ylim.qhat <- c(floor(min( c(min(data$Qhat.flow,na.rm=T),min(viterbi.est,na.rm=T)))) ,
                              ceiling(max( c(max(data$Qhat.flow,na.rm=T),max(viterbi.est,na.rm=T)))))
 
-              # Plot obs Qhat
-              plot(obsDates.asISO, data$Qhat.flow, type='l',col='grey', lwd=1,
-                   ylim=ylim.qhat, xlim=xlim, xlab='', ylab='',xaxt='n')
-
-              # Plot Markov states as boxes
-              for (i in 1:nQhat) {
-                points(obsDates.asISO[i], viterbi.est[i,2],col=state.colours[viterbiPath[i]], bg=state.colours[viterbiPath[i]], pch=21)
-                lines(rep(obsDates.asISO[i],2), line.matrix[i,],col=state.colours[viterbiPath[i]], lwd=1)
-              }
-
-              # Add axis labels
-              mtext("Transformed flow",side=2,line=3)
-              mtext(paste("[f(mm) /",plot.units,"]"),side=2,line=2, cex=0.85)
-              # mtext('Year',side=1,line=2)
-              abline(v=xaxis.ticks, col = "lightgray", lty = "dotted",lwd = par("lwd"))
-              grid(NA,NULL)
-              plot.range=par("usr")
-              text(plot.range[1]+diff(plot.range[1:2])*0.025, plot.range[3]+diff(par("usr")[3:4])*0.95, labels="C", font=1, cex=2,pos=1)
+              # # Plot obs Qhat
+              # plot(obsDates.asISO, data$Qhat.flow, type='l',col='grey', lwd=1,
+              #      ylim=ylim.qhat, xlim=xlim, xlab='', ylab='',xaxt='n')
+              #
+              # # Plot Markov states as boxes
+              # for (i in 1:nQhat) {
+              #   points(obsDates.asISO[i], viterbi.est[i,2],col=state.colours[viterbiPath[i]], bg=state.colours[viterbiPath[i]], pch=21)
+              #   lines(rep(obsDates.asISO[i],2), line.matrix[i,],col=state.colours[viterbiPath[i]], lwd=1)
+              # }
+              #
+              # # Add axis labels
+              # mtext("Transformed flow",side=2,line=3)
+              # mtext(paste("[f(mm) /",plot.units,"]"),side=2,line=2, cex=0.85)
+              # # mtext('Year',side=1,line=2)
+              # abline(v=xaxis.ticks, col = "lightgray", lty = "dotted",lwd = par("lwd"))
+              # grid(NA,NULL)
+              # plot.range=par("usr")
+              # text(plot.range[1]+diff(plot.range[1:2])*0.025, plot.range[3]+diff(par("usr")[3:4])*0.95, labels="C", font=1, cex=2,pos=1)
 
 
               # Plot the cummulative rainfall residual.
               #--------------
 
-              # Calculate the means and residuals
-              if (plot.units == 'yr') {
-                P.mean = mean(data$precipitation)
-                P.resid = data$precipitation - P.mean;
-              } else {
-                P.mean = rep(NA,length(.Object@QhatModel.object@subAnnual.Monthly.Steps))
-                P.resid = rep(NA, length(data$precipitation))
-                for (i in 1:length(.Object@QhatModel.object@subAnnual.Monthly.Steps)) {
-                  filt = data$month == .Object@QhatModel.object@subAnnual.Monthly.Steps[i]
-                  P.mean[i] =  mean(data$precipitation[filt])
-                  P.resid[filt] = data$precipitation[filt] - P.mean[i]
-                }
-              }
+              # # Calculate the means and residuals
+              # if (plot.units == 'yr') {
+              #   P.mean = mean(data$precipitation)
+              #   P.resid = data$precipitation - P.mean;
+              # } else {
+              #   P.mean = rep(NA,length(.Object@QhatModel.object@subAnnual.Monthly.Steps))
+              #   P.resid = rep(NA, length(data$precipitation))
+              #   for (i in 1:length(.Object@QhatModel.object@subAnnual.Monthly.Steps)) {
+              #     filt = data$month == .Object@QhatModel.object@subAnnual.Monthly.Steps[i]
+              #     P.mean[i] =  mean(data$precipitation[filt])
+              #     P.resid[filt] = data$precipitation[filt] - P.mean[i]
+              #   }
+              # }
 
               # # Plot the residuals
               # plot(obsDates.asISO, P.resid,type='p',xlim=xlim, col='white', bg='white', pch=21, xlab='', ylab='')
@@ -1162,26 +1162,26 @@ setMethod(f="viterbi",signature=c("hydroState","data.frame","logical","numeric",
               # lines(obsDates.asISO, rep(0,length(obsDates.asISO)),col='grey')
               # mtext("Rainfall residual [mm]",side=2,line=3)
               # mtext('Year',side=1,line=2)
-
-              # Calculate the cumulative residuals.
-              P.cumResid = cumsum(P.resid)
-
-              # Plot the cumm residuals
-              plot(obsDates.asISO, P.cumResid, type='l',col='grey', lwd=1, xlim=xlim, xlab='', ylab='',xaxt='n')
-              abline(v=xaxis.ticks, col = "lightgray", lty = "dotted",lwd = par("lwd"))
-              grid(NA,NULL)
-              legend('topright', legend=c('Cum. residual ',.Object@state.labels),
-                     lty=c(1,NA,NA),pch=c(NA,21,21), col=c('grey',state.colours),
-                     pt.bg=c(NA,state.colours), xjust=0, cex=0.7, bg='white')
-
-              # Colour the points by the Viterbi state.
-              for (i in 1:nQhat) {
-                points(obsDates.asISO[i], P.cumResid[i],col=state.colours[viterbiPath[i]], bg=state.colours[viterbiPath[i]], pch=21)
-              }
-              mtext("Cum. rainfall resid.",side=2,line=3, cex=0.7)
-              mtext(paste("[mm]"),side=2,line=2, cex=0.5)
-              plot.range=par("usr")
-              text(plot.range[1]+diff(plot.range[1:2])*0.025, plot.range[3]+diff(par("usr")[3:4])*0.95, labels="D", font=1, cex=2,pos=1)
+#
+#               # Calculate the cumulative residuals.
+#               P.cumResid = cumsum(P.resid)
+#
+#               # Plot the cumm residuals
+#               plot(obsDates.asISO, P.cumResid, type='l',col='grey', lwd=1, xlim=xlim, xlab='', ylab='',xaxt='n')
+#               abline(v=xaxis.ticks, col = "lightgray", lty = "dotted",lwd = par("lwd"))
+#               grid(NA,NULL)
+#               legend('topright', legend=c('Cum. residual ',.Object@state.labels),
+#                      lty=c(1,NA,NA),pch=c(NA,21,21), col=c('grey',state.colours),
+#                      pt.bg=c(NA,state.colours), xjust=0, cex=0.7, bg='white')
+#
+#               # Colour the points by the Viterbi state.
+#               for (i in 1:nQhat) {
+#                 points(obsDates.asISO[i], P.cumResid[i],col=state.colours[viterbiPath[i]], bg=state.colours[viterbiPath[i]], pch=21)
+#               }
+#               mtext("Cum. rainfall resid.",side=2,line=3, cex=0.7)
+#               mtext(paste("[mm]"),side=2,line=2, cex=0.5)
+#               plot.range=par("usr")
+#               text(plot.range[1]+diff(plot.range[1:2])*0.025, plot.range[3]+diff(par("usr")[3:4])*0.95, labels="D", font=1, cex=2,pos=1)
 
               # Plot the conditional state probability for each state
               #if (nStates>1) {
@@ -1219,7 +1219,7 @@ setMethod(f="viterbi",signature=c("hydroState","data.frame","logical","numeric",
                      lty=c(1,1),pch=c(NA,NA), col=state.colours,lwd=1,
                      xjust=0, cex=0.8, bg='white', x.intersp = 0.8, y.intersp = 0.8)
               plot.range=par("usr")
-              text(plot.range[1]+diff(plot.range[1:2])*0.025, plot.range[3]+diff(par("usr")[3:4])*0.95, labels="E", font=1, cex=2,pos=1)
+              text(plot.range[1]+diff(plot.range[1:2])*0.025, plot.range[3]+diff(par("usr")[3:4])*0.95, labels="C", font=1, cex=2,pos=1)
 
 
               #}
