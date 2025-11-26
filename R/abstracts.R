@@ -105,3 +105,7 @@ setGeneric(name="getLogBackwardProbabilities",def=function(.Object, data, emissi
 setMethod(f="getLogBackwardProbabilities", signature=c("markov","data.frame","matrix"),
           definition=function(.Object, data, emission.probs)
           {})
+#' @exportMethod getAIC.bestModel
+setGeneric(name="getAIC.bestModel",def=function(.Object, use.calib.reference.criteria=NA, use.sampleSize.penality=NA,min.obs.per.state=NA) {standardGeneric("getAIC.bestModel")})
+setMethod(f="getAIC.bestModel",signature="markov",definition=function(.Object, use.calib.reference.criteria=T, use.sampleSize.penality=F, min.obs.per.state=3)
+{})
