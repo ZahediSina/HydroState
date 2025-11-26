@@ -459,7 +459,7 @@ setMethod(f="getAIC",signature="hydroState.allModels",definition=function(.Objec
 
 # Get best model (by mimimum AIC)
 #' @exportMethod getAIC.bestModel
-setGeneric(name="getAIC.bestModel",def=function(.Object, use.calib.reference.criteria=NA, use.sampleSize.penality=NA,min.obs.per.state=NA) {standardGeneric("getAIC.bestModel")})
+#setGeneric(name="getAIC.bestModel",def=function(.Object, use.calib.reference.criteria=NA, use.sampleSize.penality=NA,min.obs.per.state=NA) {standardGeneric("getAIC.bestModel")})
 setMethod(f="getAIC.bestModel",signature="hydroState.allModels",definition=function(.Object, use.calib.reference.criteria=T, use.sampleSize.penality=T, min.obs.per.state=3)
 {
   # Get AIC
